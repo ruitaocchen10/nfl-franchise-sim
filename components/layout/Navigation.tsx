@@ -3,25 +3,25 @@
  * Main navigation bar for the application
  */
 
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { logout } from '@/app/actions/auth'
-import { cn } from '@/lib/utils'
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { logout } from "@/app/actions/auth";
+import { cn } from "@/lib/utils";
 
 interface NavigationProps {
-  userEmail?: string
+  userEmail?: string;
 }
 
 export default function Navigation({ userEmail }: NavigationProps) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   const navItems = [
-    { name: 'Dashboard', href: '/dashboard' },
-    { name: 'Franchises', href: '/franchises' },
+    { name: "Dashboard", href: "/dashboard" },
+    { name: "Franchises", href: "/franchises" },
     // Additional nav items will be added as features are built
-  ]
+  ];
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -42,10 +42,10 @@ export default function Navigation({ userEmail }: NavigationProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                    "inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
                     pathname === item.href
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                      ? "bg-blue-50 text-blue-700"
+                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
                   )}
                 >
                   {item.name}
@@ -73,5 +73,5 @@ export default function Navigation({ userEmail }: NavigationProps) {
         </div>
       </div>
     </nav>
-  )
+  );
 }

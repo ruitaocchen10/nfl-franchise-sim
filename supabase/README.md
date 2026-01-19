@@ -19,6 +19,7 @@ cp .env.local.example .env.local
 ```
 
 Then edit `.env.local`:
+
 ```
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -33,6 +34,7 @@ In your Supabase project dashboard:
 3. Paste and execute the SQL
 
 This will create:
+
 - All core tables (franchises, teams, seasons, players, etc.)
 - Enum types
 - Indexes for performance
@@ -47,6 +49,7 @@ In the SQL Editor:
 2. Paste and execute the SQL
 
 This will populate the database with:
+
 - All 32 NFL teams with correct branding
 
 ## Database Schema Overview
@@ -66,6 +69,7 @@ This will populate the database with:
 ### Security
 
 Row Level Security (RLS) is enabled on all tables:
+
 - Users can only access their own franchise data
 - Template season data is readable by all authenticated users
 - Teams table is public (read-only)
@@ -81,20 +85,24 @@ After setting up Supabase:
 ## Troubleshooting
 
 **Error: "relation does not exist"**
+
 - Make sure you ran the migration file completely
 - Check that the UUID extension is enabled
 
 **Error: "RLS policy violation"**
+
 - Ensure you're authenticated when making requests
 - Check that the RLS policies were created correctly
 
 **Can't connect from Next.js**
+
 - Verify your `.env.local` credentials are correct
 - Check that the Supabase project URL is reachable
 
 ## Future Migrations
 
 Additional migrations will be added for:
+
 - Game simulation tables (games, game_stats, game_events)
 - Draft system tables (draft_picks, draft_prospects, scouting_reports)
 - Trade system tables (trades, trade_assets)

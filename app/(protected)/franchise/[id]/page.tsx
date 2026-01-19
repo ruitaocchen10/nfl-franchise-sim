@@ -3,33 +3,35 @@
  * Main hub for a specific franchise - shows overview and quick actions
  */
 
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import Navigation from '@/components/layout/Navigation'
-import { getFranchiseById } from '@/app/actions/franchises'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
-import Link from 'next/link'
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import Navigation from "@/components/layout/Navigation";
+import { getFranchiseById } from "@/app/actions/franchises";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
+import Link from "next/link";
 
 interface FranchisePageProps {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string }>;
 }
 
 export default async function FranchisePage({ params }: FranchisePageProps) {
-  const supabase = await createClient()
-  const { id } = await params
+  const supabase = await createClient();
+  const { id } = await params;
 
   // Check authentication
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
-    redirect('/login')
+    redirect("/login");
   }
 
   // Fetch franchise details
-  const franchise = await getFranchiseById(id)
+  const franchise = (await getFranchiseById(id)) as any;
 
   // Type guard for team and season
-  const team = franchise.team as any
-  const season = franchise.current_season as any
+  const team = franchise.team as any;
+  const season = franchise.current_season as any;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -46,7 +48,9 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
               {team.abbreviation}
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{franchise.franchise_name}</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {franchise.franchise_name}
+              </h1>
               <p className="text-gray-600">
                 {team.city} {team.name} • {season.year} Season
               </p>
@@ -59,7 +63,9 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <p className="text-sm text-gray-600">Season</p>
-                  <p className="text-2xl font-bold text-gray-900">{season.year}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {season.year}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -68,7 +74,9 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <p className="text-sm text-gray-600">Phase</p>
-                  <p className="text-2xl font-bold text-gray-900 capitalize">{season.phase}</p>
+                  <p className="text-2xl font-bold text-gray-900 capitalize">
+                    {season.phase}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -77,7 +85,9 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <p className="text-sm text-gray-600">Week</p>
-                  <p className="text-2xl font-bold text-gray-900">{season.current_week}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {season.current_week}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -86,7 +96,9 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <p className="text-sm text-gray-600">Difficulty</p>
-                  <p className="text-2xl font-bold text-gray-900 capitalize">{franchise.difficulty}</p>
+                  <p className="text-2xl font-bold text-gray-900 capitalize">
+                    {franchise.difficulty}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -103,37 +115,57 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
                 <CardContent>
                   <div className="space-y-4">
                     <p className="text-gray-600">
-                      Your franchise has been created successfully! You're starting in the <span className="font-semibold">{season.phase}</span> phase
-                      of the {season.year} season.
+                      Your franchise has been created successfully! You're
+                      starting in the{" "}
+                      <span className="font-semibold">{season.phase}</span>{" "}
+                      phase of the {season.year} season.
                     </p>
 
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h3 className="font-semibold text-blue-900 mb-2">Next Steps</h3>
+                      <h3 className="font-semibold text-blue-900 mb-2">
+                        Next Steps
+                      </h3>
                       <ul className="space-y-2 text-sm text-blue-800">
                         <li className="flex items-start gap-2">
                           <span className="text-blue-600">1.</span>
-                          <span><strong>Build your roster:</strong> Once player data is available, you'll be able to view and manage your team's 53-man roster</span>
+                          <span>
+                            <strong>Build your roster:</strong> Once player data
+                            is available, you'll be able to view and manage your
+                            team's 53-man roster
+                          </span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-blue-600">2.</span>
-                          <span><strong>Set your depth chart:</strong> Organize your starting lineup and backups</span>
+                          <span>
+                            <strong>Set your depth chart:</strong> Organize your
+                            starting lineup and backups
+                          </span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-blue-600">3.</span>
-                          <span><strong>Simulate games:</strong> Progress through the season and compete for the playoffs</span>
+                          <span>
+                            <strong>Simulate games:</strong> Progress through
+                            the season and compete for the playoffs
+                          </span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-blue-600">4.</span>
-                          <span><strong>Make moves:</strong> Trade players, sign free agents, and draft rookies</span>
+                          <span>
+                            <strong>Make moves:</strong> Trade players, sign
+                            free agents, and draft rookies
+                          </span>
                         </li>
                       </ul>
                     </div>
 
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                      <h3 className="font-semibold text-yellow-900 mb-2">Player Data Coming Soon</h3>
+                      <h3 className="font-semibold text-yellow-900 mb-2">
+                        Player Data Coming Soon
+                      </h3>
                       <p className="text-sm text-yellow-800">
-                        Your franchise structure is ready, but player rosters haven't been initialized yet.
-                        The next development phase will add NFL player data to populate your team.
+                        Your franchise structure is ready, but player rosters
+                        haven't been initialized yet. The next development phase
+                        will add NFL player data to populate your team.
                       </p>
                     </div>
                   </div>
@@ -189,7 +221,9 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
                     </div>
                     <div>
                       <p className="text-gray-600">Division</p>
-                      <p className="font-semibold">{team.conference} {team.division}</p>
+                      <p className="font-semibold">
+                        {team.conference} {team.division}
+                      </p>
                     </div>
                     <div>
                       <p className="text-gray-600">Team Colors</p>
@@ -214,42 +248,48 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
         </div>
       </main>
     </div>
-  )
+  );
 }
 
 interface QuickActionButtonProps {
-  href: string
-  title: string
-  description: string
-  disabled?: boolean
+  href: string;
+  title: string;
+  description: string;
+  disabled?: boolean;
 }
 
-function QuickActionButton({ href, title, description, disabled = false }: QuickActionButtonProps) {
-  const baseClasses = "block w-full px-4 py-3 rounded-lg border text-left transition-colors"
-  const enabledClasses = "border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50"
-  const disabledClasses = "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed"
+function QuickActionButton({
+  href,
+  title,
+  description,
+  disabled = false,
+}: QuickActionButtonProps) {
+  const baseClasses =
+    "block w-full px-4 py-3 rounded-lg border text-left transition-colors";
+  const enabledClasses =
+    "border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50";
+  const disabledClasses =
+    "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed";
 
   const content = (
     <>
       <p className="font-semibold text-gray-900">{title}</p>
       <p className="text-sm text-gray-600 mt-0.5">{description}</p>
       {disabled && (
-        <span className="inline-block mt-1 text-xs text-gray-500">Coming soon</span>
+        <span className="inline-block mt-1 text-xs text-gray-500">
+          Coming soon
+        </span>
       )}
     </>
-  )
+  );
 
   if (disabled) {
-    return (
-      <div className={`${baseClasses} ${disabledClasses}`}>
-        {content}
-      </div>
-    )
+    return <div className={`${baseClasses} ${disabledClasses}`}>{content}</div>;
   }
 
   return (
     <Link href={href} className={`${baseClasses} ${enabledClasses}`}>
       {content}
     </Link>
-  )
+  );
 }

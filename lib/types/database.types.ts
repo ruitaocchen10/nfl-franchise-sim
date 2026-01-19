@@ -50,6 +50,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       teams: {
         Row: {
@@ -88,6 +89,7 @@ export interface Database {
           logo_url?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       seasons: {
         Row: {
@@ -120,6 +122,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       players: {
         Row: {
@@ -161,6 +164,7 @@ export interface Database {
           weight_lbs?: number | null
           created_at?: string
         }
+        Relationships: []
       }
       player_attributes: {
         Row: {
@@ -214,6 +218,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       roster_spots: {
         Row: {
@@ -249,6 +254,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       contracts: {
         Row: {
@@ -293,6 +299,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       team_standings: {
         Row: {
@@ -337,6 +344,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       team_finances: {
         Row: {
@@ -372,6 +380,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
     }
     Views: {

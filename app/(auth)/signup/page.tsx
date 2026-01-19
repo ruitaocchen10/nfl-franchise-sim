@@ -3,8 +3,8 @@
  * Allows users to create a new account
  */
 
-import { signup } from '@/app/actions/auth'
-import Link from 'next/link'
+import { signup } from "@/app/actions/auth";
+import Link from "next/link";
 
 export default function SignupPage() {
   return (
@@ -18,7 +18,7 @@ export default function SignupPage() {
             Create your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Already have an account?{' '}
+            Already have an account?{" "}
             <Link
               href="/login"
               className="font-medium text-blue-600 hover:text-blue-500"
@@ -85,7 +85,7 @@ export default function SignupPage() {
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
-              I agree to the{' '}
+              I agree to the{" "}
               <a href="#" className="text-blue-600 hover:text-blue-500">
                 Terms and Conditions
               </a>
@@ -103,5 +103,5 @@ export default function SignupPage() {
         </form>
       </div>
     </div>
-  )
+  );
 }

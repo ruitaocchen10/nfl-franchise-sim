@@ -3,78 +3,80 @@
  * Handles login, signup, and logout functionality
  */
 
-'use server'
+"use server";
 
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 
 export async function login(formData: FormData) {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
   // Type-casting here for convenience
   // In production, you should validate your inputs
   const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  }
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+  };
 
-  const { error } = await supabase.auth.signInWithPassword(data)
+  const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    redirect('/login?error=Invalid credentials')
+    redirect("/login?error=Invalid credentials");
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  revalidatePath("/", "layout");
+  redirect("/dashboard");
 }
 
 export async function signup(formData: FormData) {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
   // Type-casting here for convenience
   // In production, you should validate your inputs
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-  const confirmPassword = formData.get('confirm-password') as string
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const confirmPassword = formData.get("confirm-password") as string;
 
   // Basic validation
   if (password !== confirmPassword) {
-    redirect('/signup?error=Passwords do not match')
+    redirect("/signup?error=Passwords do not match");
   }
 
   if (password.length < 6) {
-    redirect('/signup?error=Password must be at least 6 characters')
+    redirect("/signup?error=Password must be at least 6 characters");
   }
 
   const { error } = await supabase.auth.signUp({
     email,
     password,
-  })
+  });
 
   if (error) {
-    redirect('/signup?error=' + encodeURIComponent(error.message))
+    redirect("/signup?error=" + encodeURIComponent(error.message));
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  revalidatePath("/", "layout");
+  redirect("/dashboard");
 }
 
 export async function logout() {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
-  const { error } = await supabase.auth.signOut()
+  const { error } = await supabase.auth.signOut();
 
   if (error) {
-    redirect('/error')
+    redirect("/error");
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/login')
+  revalidatePath("/", "layout");
+  redirect("/login");
 }
 
 export async function getUser() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  return user
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user;
 }
