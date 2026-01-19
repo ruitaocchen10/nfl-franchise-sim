@@ -3,24 +3,26 @@
  * Main hub for authenticated users
  */
 
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import Navigation from '@/components/layout/Navigation'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
-import Link from 'next/link'
-import { getFranchises } from '@/app/actions/franchises'
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import Navigation from "@/components/layout/Navigation";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
+import Link from "next/link";
+import { getFranchises } from "@/app/actions/franchises";
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login')
+    redirect("/login");
   }
 
   // Fetch user's franchises
-  const franchises = await getFranchises()
+  const franchises = await getFranchises();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -44,7 +46,8 @@ export default async function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-6">
-                  You don't have any franchises yet. Create your first franchise to start your GM career!
+                  You don't have any franchises yet. Create your first franchise
+                  to start your GM career!
                 </p>
 
                 <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
@@ -72,7 +75,9 @@ export default async function DashboardPage() {
           ) : (
             <div>
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Your Franchises</h2>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Your Franchises
+                </h2>
                 <Link
                   href="/franchises/create"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
@@ -91,16 +96,16 @@ export default async function DashboardPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }
 
 interface FranchiseCardProps {
-  franchise: any
+  franchise: any;
 }
 
 function FranchiseCard({ franchise }: FranchiseCardProps) {
-  const team = franchise.team
-  const season = franchise.current_season
+  const team = franchise.team;
+  const season = franchise.current_season;
 
   return (
     <Link href={`/franchise/${franchise.id}`}>
@@ -114,7 +119,9 @@ function FranchiseCard({ franchise }: FranchiseCardProps) {
               {team.abbreviation}
             </div>
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg truncate">{franchise.franchise_name}</CardTitle>
+              <CardTitle className="text-lg truncate">
+                {franchise.franchise_name}
+              </CardTitle>
               <p className="text-sm text-gray-600 truncate">
                 {team.city} {team.name}
               </p>
@@ -137,7 +144,9 @@ function FranchiseCard({ franchise }: FranchiseCardProps) {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Difficulty</span>
-              <span className="font-semibold capitalize">{franchise.difficulty}</span>
+              <span className="font-semibold capitalize">
+                {franchise.difficulty}
+              </span>
             </div>
 
             <div className="pt-3 border-t">
@@ -149,5 +158,5 @@ function FranchiseCard({ franchise }: FranchiseCardProps) {
         </CardContent>
       </Card>
     </Link>
-  )
+  );
 }
