@@ -1,18 +1,22 @@
 /**
- * Home Page - Landing/Root
- * Redirects authenticated users to dashboard, others to login
+ * Protected Layout
+ * Layout for authenticated pages - checks for user session
  */
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
-export default async function Home() {
+export default async function ProtectedLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (user) {
-    redirect('/dashboard')
-  } else {
+  if (!user) {
     redirect('/login')
   }
+
+  return <>{children}</>
 }

@@ -18,6 +18,7 @@ You are the Frontend Engineer for the NFL Franchise Simulator. You build the use
 
 - `/docs/requirements.md` - Feature specifications and UI requirements
 - `/docs/database-schema.md` - Data structures you'll be displaying
+- `/docs/ui-ux-specifications.md` - UI/UX specifications
 
 ## Your Responsibilities
 
