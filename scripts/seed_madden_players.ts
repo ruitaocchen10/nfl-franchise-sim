@@ -12,6 +12,20 @@ import { createClient } from "@supabase/supabase-js";
 import * as fs from "fs";
 import * as path from "path";
 
+// Load environment variables from .env.local
+const envPath = path.join(process.cwd(), ".env.local");
+if (fs.existsSync(envPath)) {
+  const envFile = fs.readFileSync(envPath, "utf-8");
+  envFile.split("\n").forEach((line) => {
+    const match = line.match(/^([^=:#]+)=(.*)$/);
+    if (match) {
+      const key = match[1].trim();
+      const value = match[2].trim();
+      process.env[key] = value;
+    }
+  });
+}
+
 interface PlayerJSON {
   id: string;
   first_name: string;
@@ -111,9 +125,15 @@ class MaddenSeeder {
     );
     console.log(`   ✅ Found ${teamMap.size} teams`);
 
+    // Create attribute map for easy lookup
+    const attributeMap = new Map(
+      attributesData.map((attr) => [attr.player_id, attr]),
+    );
+
     // Insert players
     console.log("\n💾 Inserting players...");
     const playerIdMap = new Map<string, string>();
+    const playerTeamMap = new Map<string, string>(); // Store team assignments
     let insertedCount = 0;
 
     for (let i = 0; i < playersData.length; i += 100) {
@@ -123,16 +143,12 @@ class MaddenSeeder {
         first_name: p.first_name,
         last_name: p.last_name,
         position: p.position,
-        age: p.age,
         college: p.college || null,
         draft_year: p.draft_year,
         draft_round: p.draft_round,
         draft_pick: p.draft_pick,
-        years_pro: p.years_pro,
-        height: p.height,
-        weight: p.weight,
-        photo_url: p.photo_url || null,
-        handedness: p.handedness,
+        height_inches: p.height,
+        weight_lbs: p.weight,
       }));
 
       const { data: insertedPlayers, error: playersError } = await this.supabase
@@ -148,10 +164,11 @@ class MaddenSeeder {
         continue;
       }
 
-      // Map temporary IDs to real database IDs
+      // Map temporary IDs to real database IDs and store team assignments
       insertedPlayers.forEach((dbPlayer: any, idx: number) => {
-        const originalId = batch[idx].id;
-        playerIdMap.set(originalId, dbPlayer.id);
+        const originalPlayer = batch[idx];
+        playerIdMap.set(originalPlayer.id, dbPlayer.id);
+        playerTeamMap.set(dbPlayer.id, originalPlayer.team);
       });
 
       insertedCount += insertedPlayers.length;
@@ -166,48 +183,37 @@ class MaddenSeeder {
     console.log("\n💾 Inserting player attributes...");
     let attributesInsertedCount = 0;
 
-    for (let i = 0; i < attributesData.length; i += 100) {
-      const batch = attributesData.slice(i, i + 100);
+    for (let i = 0; i < playersData.length; i += 100) {
+      const batch = playersData.slice(i, i + 100);
 
       const attributesToInsert = batch
-        .map((attr) => {
-          const dbPlayerId = playerIdMap.get(attr.player_id);
-          if (!dbPlayerId) {
-            console.warn(`   ⚠️  Player ID not found: ${attr.player_id}`);
+        .map((player) => {
+          const dbPlayerId = playerIdMap.get(player.id);
+          const attr = attributeMap.get(player.id);
+
+          if (!dbPlayerId || !attr) {
+            console.warn(
+              `   ⚠️  Player or attributes not found: ${player.id}`,
+            );
             return null;
           }
+
+          // Helper to clamp values to valid range (40-99)
+          const clamp = (val: number) => Math.max(40, Math.min(99, val));
 
           return {
             player_id: dbPlayerId,
             season_id: seasonId,
-            overall: attr.overall,
-            potential: attr.potential,
-            injury_prone: attr.injury_prone,
-            morale: attr.morale,
-            confidence: attr.confidence,
+            age: player.age,
+            overall_rating: clamp(attr.overall),
+            speed: clamp(attr.speed),
+            strength: clamp(attr.strength),
+            agility: clamp(attr.stamina), // Map stamina to agility
+            awareness: clamp(attr.awareness),
+            injury_prone: Math.max(0, Math.min(99, attr.injury_prone)),
             development_trait: attr.development_trait,
-            speed: attr.speed,
-            strength: attr.strength,
-            stamina: attr.stamina,
-            awareness: attr.awareness,
-            accuracy: attr.accuracy,
-            arm_strength: attr.arm_strength,
-            throw_power: attr.throw_power,
-            pocket_presence: attr.pocket_presence,
-            hands: attr.hands,
-            route_running: attr.route_running,
-            catching: attr.catching,
-            elusiveness: attr.elusiveness,
-            pass_block: attr.pass_block,
-            run_block: attr.run_block,
-            pass_rush: attr.pass_rush,
-            run_stop: attr.run_stop,
-            tackling: attr.tackling,
-            coverage: attr.coverage,
-            jumping: attr.jumping,
-            play_recognition: attr.play_recognition,
-            kick_power: attr.kick_power,
-            kick_accuracy: attr.kick_accuracy,
+            morale: Math.max(0, Math.min(100, attr.morale)),
+            years_pro: player.years_pro,
           };
         })
         .filter(Boolean);
@@ -227,7 +233,7 @@ class MaddenSeeder {
 
       attributesInsertedCount += insertedAttrs.length;
       process.stdout.write(
-        `\r   📥 Progress: ${attributesInsertedCount}/${attributesData.length}`,
+        `\r   📥 Progress: ${attributesInsertedCount}/${playersData.length}`,
       );
     }
 
@@ -235,11 +241,68 @@ class MaddenSeeder {
       `\n   ✅ Inserted ${attributesInsertedCount} player attributes`,
     );
 
+    // Create roster spots
+    console.log("\n💾 Creating roster assignments...");
+    let rosterSpotsCount = 0;
+
+    // Get all player IDs with their teams
+    const playerRosterData: Array<{
+      playerId: string;
+      teamAbbr: string;
+    }> = [];
+
+    playerTeamMap.forEach((teamAbbr, playerId) => {
+      playerRosterData.push({ playerId, teamAbbr });
+    });
+
+    for (let i = 0; i < playerRosterData.length; i += 100) {
+      const batch = playerRosterData.slice(i, i + 100);
+
+      const rosterSpotsToInsert = batch
+        .map((item) => {
+          const teamId = teamMap.get(item.teamAbbr);
+          if (!teamId) {
+            console.warn(`   ⚠️  Team not found: ${item.teamAbbr}`);
+            return null;
+          }
+
+          return {
+            season_id: seasonId,
+            team_id: teamId,
+            player_id: item.playerId,
+            status: "active",
+            depth_position: 1, // Will be set properly later by depth chart logic
+          };
+        })
+        .filter(Boolean);
+
+      const { data: insertedSpots, error: spotsError } = await this.supabase
+        .from("roster_spots")
+        .insert(rosterSpotsToInsert)
+        .select("id");
+
+      if (spotsError) {
+        console.error(
+          `   ❌ Error inserting batch ${i / 100 + 1}:`,
+          spotsError.message,
+        );
+        continue;
+      }
+
+      rosterSpotsCount += insertedSpots.length;
+      process.stdout.write(
+        `\r   📥 Progress: ${rosterSpotsCount}/${playerRosterData.length}`,
+      );
+    }
+
+    console.log(`\n   ✅ Created ${rosterSpotsCount} roster assignments`);
+
     // Summary
     console.log("\n" + "=".repeat(60));
     console.log("🎉 Seeding Complete!");
     console.log(`   Players: ${insertedCount}`);
     console.log(`   Attributes: ${attributesInsertedCount}`);
+    console.log(`   Roster Spots: ${rosterSpotsCount}`);
     console.log("=".repeat(60) + "\n");
   }
 

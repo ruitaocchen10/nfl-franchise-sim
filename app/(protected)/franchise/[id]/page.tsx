@@ -121,52 +121,51 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
                       phase of the {season.year} season.
                     </p>
 
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <h3 className="font-semibold text-green-900 mb-2">
+                        ✓ Roster Loaded!
+                      </h3>
+                      <p className="text-sm text-green-800 mb-3">
+                        Your team's roster has been populated with player data.
+                        Click on "Roster" above to view your players.
+                      </p>
+                    </div>
+
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <h3 className="font-semibold text-blue-900 mb-2">
                         Next Steps
                       </h3>
                       <ul className="space-y-2 text-sm text-blue-800">
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600">1.</span>
+                          <span className="text-green-600">✓</span>
                           <span>
-                            <strong>Build your roster:</strong> Once player data
-                            is available, you'll be able to view and manage your
-                            team's 53-man roster
+                            <strong>View your roster:</strong> Check out your
+                            team's players, ratings, and attributes
                           </span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-blue-600">2.</span>
                           <span>
                             <strong>Set your depth chart:</strong> Organize your
-                            starting lineup and backups
+                            starting lineup and backups (coming soon)
                           </span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-blue-600">3.</span>
                           <span>
                             <strong>Simulate games:</strong> Progress through
-                            the season and compete for the playoffs
+                            the season and compete for the playoffs (coming
+                            soon)
                           </span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-blue-600">4.</span>
                           <span>
                             <strong>Make moves:</strong> Trade players, sign
-                            free agents, and draft rookies
+                            free agents, and draft rookies (coming soon)
                           </span>
                         </li>
                       </ul>
-                    </div>
-
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                      <h3 className="font-semibold text-yellow-900 mb-2">
-                        Player Data Coming Soon
-                      </h3>
-                      <p className="text-sm text-yellow-800">
-                        Your franchise structure is ready, but player rosters
-                        haven't been initialized yet. The next development phase
-                        will add NFL player data to populate your team.
-                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -185,7 +184,7 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
                       href={`/franchise/${id}/roster`}
                       title="Roster"
                       description="View your players"
-                      disabled={true}
+                      disabled={false}
                     />
                     <QuickActionButton
                       href={`/franchise/${id}/depth-chart`}
