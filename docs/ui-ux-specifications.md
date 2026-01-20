@@ -1,473 +1,715 @@
-# UI/UX Specifications
+# Cyberpunk UI Theme - NFL Franchise Simulator
 
-## Overview
+## Dark Dystopian Gaming Aesthetic
 
-This document provides detailed interface specifications for the NFL Franchise Simulator. All pages, components, and user interactions are documented here with visual references.
-
-## Design System
-
-### Colors
-
-```
-Primary: #1a56db (Blue)
-Secondary: #16a34a (Green)
-Accent: #dc2626 (Red)
-Background: #ffffff (White)
-Surface: #f9fafb (Light Gray)
-Text Primary: #111827 (Dark Gray)
-Text Secondary: #6b7280 (Medium Gray)
-Border: #e5e7eb (Light Gray)
-```
-
-### Typography
-
-- **Headings**: Big Shoulders, Bold, 24px-48px
-- **Body**: Big Shoulders, Regular, 14px-16px
-- **Captions**: Big Shoulders, Medium, 12px
-
-### Spacing
-
-- Use 4px grid system: 4px, 8px, 12px, 16px, 24px, 32px, 48px, 64px
-
-### Components
-
-- **Border Radius**: 8px for cards, 4px for inputs
-- **Shadows**: Subtle elevation for cards and modals
-- **Buttons**: 40px height, 16px padding horizontal
-
-## Page Specifications
-
-### 1. Dashboard (Home)
-
-**Route**: `/dashboard`
-**Purpose**: Main hub after login, franchise overview
-
-**Visual Reference**:
-
-> Dashboard has a header with franchise name, 3-column layout with upcoming games (left), quick stats (center), and recent news (right)
-
-**Layout Structure**:
-
-```
-┌─────────────────────────────────────────────┐
-│ Header: Franchise Name + Season Info       │
-├─────────────────────────────────────────────┤
-│ ┌─────────┬─────────┬─────────┬─────────┐ │
-│ │ Record  │ Cap $   │ Next    │ Rank    │ │
-│ │ 8-3     │ $25.2M  │ vs MIA  │ #3 AFC  │ │
-│ └─────────┴─────────┴─────────┴─────────┘ │
-├─────────────────────────────────────────────┤
-│ ┌──────────┐ ┌──────────┐ ┌──────────────┐│
-│ │ Upcoming │ │  Quick   │ │    Recent    ││
-│ │  Games   │ │ Actions  │ │    News      ││
-│ │          │ │          │ │              ││
-│ │ KC vs MIA│ │[Simulate]│ │ Player signed││
-│ │ KC @ BUF │ │[Roster]  │ │ Injury report││
-│ └──────────┘ └──────────┘ └──────────────┘│
-└─────────────────────────────────────────────┘
-```
-
-**Components Needed**:
-
-- `<DashboardHeader />` - Shows franchise name, season, record
-- `<StatCard />` - Quick stat display (reusable)
-- `<UpcomingGames />` - Next 3 games with simulate buttons
-- `<QuickActions />` - Navigation shortcuts
-- `<NewsFeed />` - Recent franchise updates
-
-**Interactions**:
-
-1. Click game → Navigate to game detail
-2. Click "Simulate" → Trigger simulation, show loading, update with results
-3. Click action button → Navigate to respective page
-
-**State**:
-
-- Loading state while fetching franchise data
-- Empty state if no franchise created
+> **Theme Inspiration**: Dark, futuristic, cyberpunk aesthetic with red accent lighting, navy/black backgrounds, and cyan highlights. Think dystopian sports management in a neon-lit digital world.
 
 ---
 
-### 2. Roster Management
+## Color Palette
 
-**Route**: `/franchise/[id]/roster`
-**Purpose**: View and manage team roster
+### Primary Colors
 
-**Layout Structure**:
+```css
+/* Dark Backgrounds */
+--bg-darkest: #060810; /* Page background */
+--bg-dark: #0a0e1a; /* Main sections */
+--bg-medium: #0f1419; /* Cards, containers */
+--bg-light: #1a2332; /* Elevated surfaces */
+--bg-lighter: #1f2937; /* Hover states */
 
+/* Accent Colors */
+--accent-red: #ff2943; /* Primary CTAs, danger, highlights */
+--accent-red-dark: #d91f38; /* Red hover states */
+--accent-red-bright: #ff3d5c; /* Bright red for emphasis */
+--accent-cyan: #00d9ff; /* Links, info, secondary actions */
+--accent-cyan-dark: #00b8d9; /* Cyan hover */
+--accent-orange: #ff6b35; /* Warnings, tertiary actions */
+--accent-purple: #a855f7; /* Special highlights */
+
+/* Status Colors */
+--success: #00ff88; /* Wins, positive stats */
+--warning: #ffaa00; /* Cautions, medium alerts */
+--error: #ff2943; /* Losses, errors */
+--info: #00d9ff; /* Info, neutral stats */
+
+/* Text Colors */
+--text-primary: #ffffff; /* Headings, important text */
+--text-secondary: #b8c5d6; /* Body text */
+--text-tertiary: #6b7a8f; /* Captions, metadata */
+--text-muted: #4a5568; /* Disabled, very subtle */
+--text-accent: #ff2943; /* Highlighted text */
+
+/* Borders */
+--border-default: #2a3441; /* Standard borders */
+--border-bright: #3d4d61; /* Hover borders */
+--border-accent: #ff2943; /* Active/focus borders */
+
+/* Special Effects */
+--glow-red: rgba(255, 41, 67, 0.4);
+--glow-cyan: rgba(0, 217, 255, 0.3);
+--shadow-dark: rgba(0, 0, 0, 0.6);
 ```
-┌─────────────────────────────────────────────┐
-│ Roster (53 Players) | Cap: $225M/$255M     │
-├─────────────────────────────────────────────┤
-│ Filters: [Position ▼] [Search...] [Sort ▼] │
-├─────────────────────────────────────────────┤
-│ ┌──┬─────────┬────┬─────┬──────┬─────────┐ │
-│ │#1│P.Mahomes│ QB │ 99  │ $45M │ [Cut]  │ │
-│ │#2│T.Kelce  │ TE │ 95  │ $14M │ [Cut]  │ │
-│ │#3│C.Jones  │ DL │ 96  │ $20M │ [Cut]  │ │
-│ └──┴─────────┴────┴─────┴──────┴─────────┘ │
-│              [Sign Free Agent]               │
-└─────────────────────────────────────────────┘
-```
-
-**Components Needed**:
-
-- `<RosterTable />` - Sortable, filterable table
-- `<PlayerRow />` - Individual player entry
-- `<FilterBar />` - Position filter, search, sort
-- `<PlayerDetailModal />` - Click player to view details
-- `<CutPlayerConfirmation />` - Confirmation dialog
-
-**Interactions**:
-
-1. Filter by position → Update table
-2. Search by name → Filter results
-3. Click player name → Open detail modal
-4. Click "Cut" → Show confirmation, update roster on confirm
-5. Sort by column → Re-order table
-
-**Data Display**:
-
-- Jersey number, Name, Position, Overall, Age, Contract, Actions
-- Color code by position
-- Highlight starters differently from backups
 
 ---
 
-### 3. Depth Chart
+## Typography
 
-**Route**: `/franchise/[id]/depth-chart`
-**Purpose**: Set starting lineup and backups
+### Font Families
 
-**Layout Structure**:
+```css
+/* Display & Headings - Futuristic, Bold */
+--font-display: "Rajdhani", "Orbitron", "Saira Condensed", sans-serif;
 
-```
-┌─────────────────────────────────────────────┐
-│              Depth Chart - Offense          │
-├─────────────────────────────────────────────┤
-│ QB               WR1             WR2        │
-│ ┌─────────┐     ┌─────────┐    ┌─────────┐│
-│ │Mahomes  │     │Hill     │    │Kelce    ││
-│ │   99    │     │   92    │    │   95    ││
-│ └─────────┘     └─────────┘    └─────────┘│
-│ ┌─────────┐     ┌─────────┐    ┌─────────┐│
-│ │Backup QB│     │Backup WR│    │Backup WR││
-│ └─────────┘     └─────────┘    └─────────┘│
-│                                             │
-│ RB               OL              OL         │
-│ [Similar layout for all positions]         │
-└─────────────────────────────────────────────┘
+/* Body Text - Clean, Readable */
+--font-body: "Inter", "Roboto", system-ui, sans-serif;
+
+/* Monospace - Stats, Numbers, Code */
+--font-mono: "JetBrains Mono", "Roboto Mono", "Courier New", monospace;
 ```
 
-**Components Needed**:
+### Font Sizes & Weights
 
-- `<DepthChartEditor />` - Main container
-- `<PositionStack />` - Vertical stack of players for one position
-- `<PlayerCard />` - Draggable player card
-- `<EmptySlot />` - Drop zone for player
+```css
+/* Display Text */
+--text-6xl: 56px; /* Hero headings */
+--text-5xl: 48px; /* Page titles */
+--text-4xl: 36px; /* Section headers */
+--text-3xl: 32px; /* Large headings */
+--text-2xl: 24px; /* Subheadings */
+--text-xl: 20px; /* Card titles */
 
-**Interactions**:
+/* Body Text */
+--text-lg: 18px; /* Large body */
+--text-base: 16px; /* Standard body */
+--text-sm: 14px; /* Small body */
+--text-xs: 12px; /* Captions */
+--text-2xs: 11px; /* Fine print */
 
-1. Drag player card → Move to new position
-2. Click player → Show detail modal
-3. Click "Auto-fill" → AI suggests optimal lineup
-4. Click "Save" → Persist changes
+/* Font Weights */
+--font-light: 300;
+--font-regular: 400;
+--font-medium: 500;
+--font-semibold: 600;
+--font-bold: 700;
+--font-extrabold: 800;
+--font-black: 900;
+```
 
-**UX Considerations**:
+### Typography Usage
 
-- Drag-and-drop interface
-- Visual feedback during drag
-- Prevent invalid assignments (e.g., QB at WR)
-- Show overall team rating changing in real-time
+```css
+/* Display Headings */
+h1,
+.display-1 {
+  font-family: var(--font-display);
+  font-size: var(--text-5xl);
+  font-weight: var(--font-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+  text-shadow: 0 0 20px var(--glow-red);
+}
+
+/* Section Headings */
+h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+}
+
+/* Card/Component Headings */
+h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+/* Body Text */
+p,
+.body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-regular);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Stats & Numbers */
+.stat,
+.number {
+  font-family: var(--font-mono);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+}
+```
 
 ---
 
-### 4. Game Simulation
+## Spacing System
 
-**Route**: `/franchise/[id]/schedule`
-**Purpose**: View schedule and simulate games
-
-**Layout Structure**:
-
+```css
+/* 4px Base Grid */
+--space-1: 4px;
+--space-2: 8px;
+--space-3: 12px;
+--space-4: 16px;
+--space-5: 20px;
+--space-6: 24px;
+--space-8: 32px;
+--space-10: 40px;
+--space-12: 48px;
+--space-16: 64px;
+--space-20: 80px;
+--space-24: 96px;
 ```
-┌─────────────────────────────────────────────┐
-│ Week 12 Schedule              [Sim Week]    │
-├─────────────────────────────────────────────┤
-│ ┌───────────────────────────────────────┐  │
-│ │ KC Chiefs (8-3) vs MIA Dolphins (6-5) │  │
-│ │ Sunday 1:00 PM                         │  │
-│ │                [Simulate Game]         │  │
-│ └───────────────────────────────────────┘  │
-│ ┌───────────────────────────────────────┐  │
-│ │ KC Chiefs @ BUF Bills (9-2)           │  │
-│ │ Thursday 8:20 PM                       │  │
-│ │                [Simulate Game]         │  │
-│ └───────────────────────────────────────┘  │
-│                                             │
-│            [Simulate to Playoffs]           │
-└─────────────────────────────────────────────┘
-```
-
-**Game Result Display**:
-
-```
-┌─────────────────────────────────────────────┐
-│ FINAL                                       │
-│ KC Chiefs      28   [View Box Score]        │
-│ MIA Dolphins   24                           │
-│                                             │
-│ Top Performers:                             │
-│ P. Mahomes: 315 YDS, 3 TD                   │
-│ T. Hill: 125 YDS, 1 TD                      │
-└─────────────────────────────────────────────┘
-```
-
-**Components Needed**:
-
-- `<ScheduleView />` - List of games
-- `<GameCard />` - Individual game display
-- `<SimulationProgress />` - Loading state during sim
-- `<GameResult />` - Score and highlights
-- `<BoxScore />` - Detailed stats modal
-
-**Interactions**:
-
-1. Click "Simulate Game" → Show progress, display result
-2. Click "Simulate Week" → Batch simulate, show results
-3. Click "View Box Score" → Open detailed stats modal
-4. Results persist immediately
 
 ---
 
-### 5. Draft Board
+## Component Styles
 
-**Route**: `/franchise/[id]/draft`
-**Purpose**: Participate in NFL Draft
+### Buttons
 
-**Layout Structure**:
+```css
+/* Primary Button (Red Accent) */
+.btn-primary {
+  background: linear-gradient(135deg, #ff2943 0%, #ff3d5c 100%);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  box-shadow:
+    0 4px 12px rgba(255, 41, 67, 0.3),
+    0 0 20px rgba(255, 41, 67, 0.2);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
 
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 16px rgba(255, 41, 67, 0.4),
+    0 0 30px rgba(255, 41, 67, 0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary Button (Cyan Accent) */
+.btn-secondary {
+  background: transparent;
+  color: #00d9ff;
+  border: 2px solid #00d9ff;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 10px 24px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(0, 217, 255, 0.1);
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+}
+
+/* Ghost Button */
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+  padding: 10px 20px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-ghost:hover {
+  border-color: var(--border-bright);
+  color: var(--text-primary);
+  background: var(--bg-light);
+}
+
+/* Danger Button */
+.btn-danger {
+  background: var(--bg-medium);
+  color: var(--error);
+  border: 1px solid var(--error);
+  padding: 10px 24px;
+  border-radius: 8px;
+}
+
+.btn-danger:hover {
+  background: rgba(255, 41, 67, 0.1);
+  box-shadow: 0 0 15px rgba(255, 41, 67, 0.2);
+}
 ```
-┌─────────────────────────────────────────────┐
-│ 2025 NFL Draft - Round 1, Pick 15 (Your Pick)│
-├─────────────────────────────────────────────┤
-│ ┌────────────┬──────────────────────────┐  │
-│ │ Prospects  │   Draft Board            │  │
-│ │            │                          │  │
-│ │[Filter ▼]  │ Pick 1: J. Smith (QB)    │  │
-│ │            │         Selected by CIN  │  │
-│ │ 1. T.Brown │ Pick 2: M. Williams (OL) │  │
-│ │    QB-85   │         Selected by HOU  │  │
-│ │    ⭐⭐⭐  │ ...                      │  │
-│ │            │ Pick 15: [YOUR PICK]     │  │
-│ │ 2. J.Adams │         [Make Pick]      │  │
-│ │    WR-83   │                          │  │
-│ │    ⭐⭐⭐  │                          │  │
-│ └────────────┴──────────────────────────┘  │
-│                                             │
-│ Team Needs: QB, WR, DL                      │
-└─────────────────────────────────────────────┘
+
+### Cards
+
+```css
+/* Standard Card */
+.card {
+  background: var(--bg-medium);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: var(--space-6);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: var(--border-bright);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Glowing Card (Featured) */
+.card-glow {
+  background: linear-gradient(135deg, #1a2332 0%, #1f2937 100%);
+  border: 1px solid var(--accent-red);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 0 30px var(--glow-red);
+}
+
+/* Card with Header */
+.card-header {
+  background: var(--bg-light);
+  border-bottom: 1px solid var(--border-default);
+  padding: var(--space-4) var(--space-6);
+  border-radius: 12px 12px 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+}
 ```
 
-**Components Needed**:
+### Inputs & Forms
 
-- `<DraftBoard />` - Main interface
-- `<ProspectList />` - Available players
-- `<ProspectCard />` - Player with scouting info
-- `<DraftLog />` - Picks made so far
-- `<TeamNeedsPanel />` - Position priorities
-- `<ScoutingReport />` - Detailed player evaluation
+```css
+/* Text Input */
+.input {
+  background: var(--bg-light);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  padding: 12px 16px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
 
-**Interactions**:
+.input:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+}
 
-1. Select prospect from list
-2. Click "Make Pick" → Confirm selection, advance draft
-3. Filter prospects by position
-4. Sort by overall, position, need fit
-5. AI teams auto-pick when their turn
-6. Trade pick option (opens trade interface)
+.input::placeholder {
+  color: var(--text-muted);
+}
 
-**Special States**:
+/* Select Dropdown */
+.select {
+  background: var(--bg-light);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  padding: 12px 40px 12px 16px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
 
-- Your pick (active, can select)
-- Other team's pick (inactive, auto-advances)
-- Between rounds (break screen)
+/* Checkbox/Radio (Custom) */
+.checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-default);
+  border-radius: 4px;
+  background: var(--bg-light);
+  transition: all 0.2s ease;
+}
+
+.checkbox:checked {
+  background: var(--accent-red);
+  border-color: var(--accent-red);
+  box-shadow: 0 0 10px var(--glow-red);
+}
+```
+
+### Tables
+
+```css
+/* Table Container */
+.table-container {
+  background: var(--bg-medium);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Table Header */
+.table-header {
+  background: var(--bg-light);
+  border-bottom: 2px solid var(--border-bright);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+}
+
+/* Table Row */
+.table-row {
+  border-bottom: 1px solid var(--border-default);
+  transition: background 0.2s ease;
+}
+
+.table-row:hover {
+  background: var(--bg-light);
+}
+
+/* Table Cell */
+.table-cell {
+  padding: var(--space-4);
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* Stat Cell (Numbers) */
+.table-cell-stat {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+```
+
+### Badges & Pills
+
+```css
+/* Status Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-success {
+  background: rgba(0, 255, 136, 0.15);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+
+.badge-warning {
+  background: rgba(255, 170, 0, 0.15);
+  color: var(--warning);
+  border: 1px solid var(--warning);
+}
+
+.badge-error {
+  background: rgba(255, 41, 67, 0.15);
+  color: var(--error);
+  border: 1px solid var(--error);
+}
+
+.badge-info {
+  background: rgba(0, 217, 255, 0.15);
+  color: var(--info);
+  border: 1px solid var(--info);
+}
+```
+
+### Modals
+
+```css
+/* Modal Backdrop */
+.modal-backdrop {
+  background: rgba(6, 8, 16, 0.8);
+  backdrop-filter: blur(8px);
+}
+
+/* Modal Container */
+.modal {
+  background: var(--bg-medium);
+  border: 1px solid var(--border-bright);
+  border-radius: 16px;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.6),
+    0 0 60px rgba(255, 41, 67, 0.15);
+  max-width: 600px;
+  width: 90%;
+}
+
+/* Modal Header */
+.modal-header {
+  background: var(--bg-light);
+  border-bottom: 1px solid var(--border-default);
+  padding: var(--space-6);
+  border-radius: 16px 16px 0 0;
+}
+
+/* Modal Title */
+.modal-title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+```
 
 ---
 
-### 6. Trade Interface
+## Visual Effects & Animations
 
-**Route**: `/franchise/[id]/trades`
-**Purpose**: Propose and evaluate trades
+### Glows
 
-**Visual Reference**:
+```css
+/* Red Glow */
+.glow-red {
+  box-shadow:
+    0 0 20px rgba(255, 41, 67, 0.4),
+    0 0 40px rgba(255, 41, 67, 0.2),
+    0 0 60px rgba(255, 41, 67, 0.1);
+}
 
-> [Figma screenshot placeholder]
+/* Cyan Glow */
+.glow-cyan {
+  box-shadow:
+    0 0 15px rgba(0, 217, 255, 0.4),
+    0 0 30px rgba(0, 217, 255, 0.2);
+}
 
-**Layout Structure**:
+/* Pulsing Glow Animation */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(255, 41, 67, 0.4),
+      0 0 40px rgba(255, 41, 67, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 30px rgba(255, 41, 67, 0.6),
+      0 0 60px rgba(255, 41, 67, 0.3);
+  }
+}
 
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
 ```
-┌─────────────────────────────────────────────┐
-│ Trade with Buffalo Bills                    │
-├─────────────────────────────────────────────┤
-│ ┌─────────────┬─────────────┐              │
-│ │ Chiefs Give │ Bills Give  │              │
-│ ├─────────────┼─────────────┤              │
-│ │ T. Kelce TE │ 1st Rd Pick │              │
-│ │    $14M     │             │              │
-│ │ [Remove]    │ [Remove]    │              │
-│ │             │             │              │
-│ │ [Add Player]│ [Add Player]│              │
-│ │ [Add Pick]  │ [Add Pick]  │              │
-│ └─────────────┴─────────────┘              │
-│                                             │
-│ Trade Value: Chiefs +15 | Bills -15 ❌     │
-│ AI Opinion: Bills unlikely to accept       │
-│                                             │
-│           [Propose Trade]                   │
-└─────────────────────────────────────────────┘
+
+### Gradients
+
+```css
+/* Background Gradient */
+.bg-gradient {
+  background: linear-gradient(135deg, #060810 0%, #0f1419 50%, #0a0e1a 100%);
+}
+
+/* Card Gradient */
+.bg-card-gradient {
+  background: linear-gradient(135deg, #1a2332 0%, #1f2937 100%);
+}
+
+/* Red Accent Gradient */
+.bg-red-gradient {
+  background: linear-gradient(90deg, #ff2943 0%, #ff6b35 100%);
+}
+
+/* Cyan Accent Gradient */
+.bg-cyan-gradient {
+  background: linear-gradient(90deg, #00d9ff 0%, #0099ff 100%);
+}
+
+/* Overlay Gradient (for images) */
+.overlay-gradient {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(6, 8, 16, 0.6) 50%,
+    rgba(6, 8, 16, 0.9) 100%
+  );
+}
 ```
 
-**Components Needed**:
+### Animations
 
-- `<TradeBuilder />` - Main interface
-- `<TradeAssetList />` - Players/picks being traded
-- `<AssetSelector />` - Modal to choose assets
-- `<TradeEvaluation />` - Fairness indicator
-- `<AIFeedback />` - Likelihood of acceptance
+```css
+/* Fade In */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 
-**Interactions**:
+.fade-in {
+  animation: fadeIn 0.3s ease;
+}
 
-1. Select team to trade with
-2. Add players/picks to each side
-3. Real-time evaluation updates
-4. Submit proposal → AI evaluates → Response
-5. View trade history
+/* Slide Up */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Hover Lift */
+.hover-lift {
+  transition: transform 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* Scan Line Effect (Optional Cyberpunk Detail) */
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+.scanline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(0, 217, 255, 0.5),
+    transparent
+  );
+  animation: scanline 8s linear infinite;
+  pointer-events: none;
+  opacity: 0.3;
+}
+```
 
 ---
 
-### 7. Free Agency
+## Layout Patterns
 
-**Route**: `/franchise/[id]/free-agency`
-**Purpose**: Sign available players
+### Dashboard Grid
 
-**Visual Reference**:
+```css
+/* Main Dashboard Layout */
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-6);
+  padding: var(--space-8);
+  background: var(--bg-darkest);
+}
 
-> [Figma screenshot placeholder]
+/* Hero Section */
+.dashboard-hero {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #1a2332 0%, #1f2937 100%);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  padding: var(--space-12);
+  position: relative;
+  overflow: hidden;
+}
 
-**Layout Structure**:
+/* Main Content */
+.dashboard-main {
+  grid-column: 1 / 9;
+}
 
-```
-┌─────────────────────────────────────────────┐
-│ Free Agents - 2025 Offseason                │
-├─────────────────────────────────────────────┤
-│ Filters: [Position ▼] [Overall ▼]          │
-├─────────────────────────────────────────────┤
-│ ┌──────────────────────────────────────┐   │
-│ │ T. Brady, QB - 85 OVR                │   │
-│ │ Market Value: $15M/year              │   │
-│ │ Interest Level: ⭐⭐⭐⭐             │   │
-│ │                     [Make Offer]     │   │
-│ └──────────────────────────────────────┘   │
-│ ┌──────────────────────────────────────┐   │
-│ │ D. Hopkins, WR - 88 OVR              │   │
-│ │ Market Value: $18M/year              │   │
-│ │ Interest Level: ⭐⭐⭐               │   │
-│ │                     [Make Offer]     │   │
-│ └──────────────────────────────────────┘   │
-└─────────────────────────────────────────────┘
-```
+/* Sidebar */
+.dashboard-sidebar {
+  grid-column: 9 / -1;
+}
 
-**Offer Modal**:
-
-```
-┌─────────────────────────────────────────────┐
-│ Contract Offer to T. Brady                  │
-├─────────────────────────────────────────────┤
-│ Years:      [1 ▼] [2] [3] [4]               │
-│ Total:      $________                       │
-│ Per Year:   $________                       │
-│ Guaranteed: $________                       │
-│ Bonus:      $________                       │
-│                                             │
-│ Salary Cap Impact: $15M                     │
-│ Cap Space After: $10.2M                     │
-│                                             │
-│ Player Interest: 65% likely to accept       │
-│                                             │
-│         [Submit Offer] [Cancel]             │
-└─────────────────────────────────────────────┘
+/* Responsive */
+@media (max-width: 1024px) {
+  .dashboard-main,
+  .dashboard-sidebar {
+    grid-column: 1 / -1;
+  }
+}
 ```
 
-**Components Needed**:
+### Card Grids
 
-- `<FreeAgentList />` - Available players
-- `<FreeAgentCard />` - Player summary
-- `<OfferModal />` - Contract proposal form
-- `<InterestMeter />` - Likelihood of acceptance
-- `<ActiveOffers />` - Pending negotiations
+```css
+/* 3-Column Card Grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-6);
+}
 
-**Interactions**:
-
-1. Browse free agents
-2. Filter by position/rating
-3. Click "Make Offer" → Open modal
-4. Fill contract details → Submit
-5. Receive acceptance/rejection/counter
-6. View active negotiations
+/* 2-Column Stat Grid */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+```
 
 ---
 
-## User Flows
+## Icon Styles
 
-### Critical User Flow: Creating First Franchise
+```css
+/* Icon Container */
+.icon {
+  width: 24px;
+  height: 24px;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
 
-```
-1. [Login Page] → User enters credentials
-   ↓
-2. [Dashboard - Empty State] → "Create Your First Franchise"
-   ↓
-3. [Franchise Creation Wizard]
-   - Step 1: Choose Team (grid of 32 teams)
-   - Step 2: Name Franchise
-   - Step 3: Select Difficulty
-   ↓
-4. [Loading] → "Building your franchise..." (copy template season)
-   ↓
-5. [Dashboard - Active Franchise] → Show franchise overview
-```
+.icon-primary {
+  color: var(--accent-red);
+}
 
-### Critical User Flow: Simulating First Game
+.icon-secondary {
+  color: var(--accent-cyan);
+}
 
-```
-1. [Dashboard] → Click "Upcoming Games"
-   ↓
-2. [Schedule View] → See next game
-   ↓
-3. [Game Card] → Click "Simulate Game"
-   ↓
-4. [Simulation Progress] → Loading spinner (1-2 seconds)
-   ↓
-5. [Game Result] → Show final score + key stats
-   ↓
-6. [Updated Schedule] → Game marked complete, next game available
-```
-
-### Critical User Flow: Making First Draft Pick
-
-```
-1. [Dashboard] → Season advances to Draft
-   ↓
-2. [Draft Notification] → "Draft starts in 2 days"
-   ↓
-3. [Draft Day] → Navigate to Draft Board
-   ↓
-4. [Draft Board] → View available prospects
-   ↓
-5. [Your Pick] → Select player, click "Make Pick"
-   ↓
-6. [Confirmation] → Player added to roster
-   ↓
-7. [Draft Continues] → AI teams make picks, advance to next round
+/* Icon with Glow */
+.icon-glow {
+  filter: drop-shadow(0 0 8px currentColor);
+}
 ```
 
 ---
@@ -476,36 +718,180 @@ Border: #e5e7eb (Light Gray)
 
 ### Breakpoints
 
-- **Mobile**: < 640px (single column)
-- **Tablet**: 640px - 1024px (two column)
-- **Desktop**: > 1024px (three column)
+```css
+/* Mobile */
+@media (max-width: 640px) {
+  :root {
+    --text-6xl: 40px;
+    --text-5xl: 32px;
+    --text-4xl: 28px;
+  }
+}
 
-### Mobile Considerations
+/* Tablet */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .dashboard {
+    grid-template-columns: repeat(8, 1fr);
+  }
+}
 
-- Stack cards vertically
-- Hamburger menu for navigation
-- Simplified tables (hide less important columns)
-- Touch-friendly buttons (44px minimum)
+/* Desktop */
+@media (min-width: 1025px) {
+  .dashboard {
+    grid-template-columns: repeat(12, 1fr);
+  }
+}
+```
 
 ---
 
 ## Accessibility
 
-- All interactive elements keyboard accessible
-- ARIA labels on all icons and buttons
-- Color contrast ratio ≥ 4.5:1
-- Focus indicators visible
-- Screen reader friendly tables
-- Form validation messages
+```css
+/* Focus States */
+*:focus {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+/* Focus Visible (Keyboard Only) */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
 
 ---
 
-## Animation & Transitions
+## Special UI Elements
 
-- Page transitions: 200ms ease
-- Button hover: 150ms
-- Modal open/close: 300ms ease-out
-- Drag and drop: Immediate feedback
-- Simulation progress: Smooth loading states
+### Progress Bars
+
+```css
+.progress-bar {
+  background: var(--bg-light);
+  border-radius: 8px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, #ff2943 0%, #ff6b35 100%);
+  height: 100%;
+  border-radius: 8px;
+  box-shadow: 0 0 15px var(--glow-red);
+  transition: width 0.3s ease;
+}
+```
+
+### Dividers
+
+```css
+.divider {
+  height: 1px;
+  background: var(--border-default);
+  margin: var(--space-8) 0;
+}
+
+.divider-glow {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-red) 50%,
+    transparent 100%
+  );
+  box-shadow: 0 0 10px var(--glow-red);
+}
+```
+
+### Loading Spinners
+
+```css
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--bg-light);
+  border-top-color: var(--accent-red);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  box-shadow: 0 0 20px var(--glow-red);
+}
+```
 
 ---
+
+## Implementation Notes
+
+### Tailwind Config Extension
+
+```javascript
+// tailwind.config.js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        "bg-darkest": "#060810",
+        "bg-dark": "#0a0e1a",
+        "accent-red": "#ff2943",
+        "accent-cyan": "#00d9ff",
+        // ... add all colors
+      },
+      fontFamily: {
+        display: ["Rajdhani", "Orbitron", "sans-serif"],
+        body: ["Inter", "Roboto", "system-ui"],
+        mono: ["JetBrains Mono", "monospace"],
+      },
+      boxShadow: {
+        "glow-red": "0 0 20px rgba(255, 41, 67, 0.4)",
+        "glow-cyan": "0 0 15px rgba(0, 217, 255, 0.3)",
+      },
+    },
+  },
+};
+```
+
+### Next Steps
+
+1. **Install Fonts**: Add Rajdhani, Inter, and JetBrains Mono via Google Fonts or self-host
+2. **Update Tailwind**: Extend config with custom colors, shadows, and fonts
+3. **Create Base Styles**: Apply theme to globals.css
+4. **Build Components**: Start with buttons, cards, and inputs
+5. **Test Accessibility**: Ensure contrast ratios meet WCAG AA standards
+6. **Add Animations**: Implement glows and transitions
+7. **Responsive Testing**: Verify on mobile, tablet, desktop
+
+---
+
+## Design Philosophy
+
+This cyberpunk theme creates a dark, immersive experience that feels like managing a sports franchise in a dystopian digital future. The red accent provides urgency and energy, while the cyan creates technological sophistication. Dark backgrounds reduce eye strain during long sessions, and the futuristic typography reinforces the gaming aesthetic.
+
+**Key Principles**:
+
+- Dark backgrounds for focus and immersion
+- Bright accents for important actions and data
+- Glows and shadows for depth and hierarchy
+- Bold typography for clarity and impact
+- Smooth animations for polish and feedback

@@ -1,26 +1,234 @@
 @import "tailwindcss";
 
+/* Cyberpunk Theme Variables */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Dark Backgrounds */
+  --bg-darkest: #060810;
+  --bg-dark: #0a0e1a;
+  --bg-medium: #0f1419;
+  --bg-light: #1a2332;
+  --bg-lighter: #1f2937;
+
+  /* Accent Colors */
+  --accent-red: #ff2943;
+  --accent-red-dark: #d91f38;
+  --accent-red-bright: #ff3d5c;
+  --accent-cyan: #00d9ff;
+  --accent-cyan-dark: #00b8d9;
+  --accent-orange: #ff6b35;
+  --accent-purple: #a855f7;
+
+  /* Status Colors */
+  --success: #00ff88;
+  --warning: #ffaa00;
+  --error: #ff2943;
+  --info: #00d9ff;
+
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #b8c5d6;
+  --text-tertiary: #6b7a8f;
+  --text-muted: #4a5568;
+  --text-accent: #ff2943;
+
+  /* Borders */
+  --border-default: #2a3441;
+  --border-bright: #3d4d61;
+  --border-accent: #ff2943;
+
+  /* Special Effects */
+  --glow-red: rgba(255, 41, 67, 0.4);
+  --glow-cyan: rgba(0, 217, 255, 0.3);
+  --shadow-dark: rgba(0, 0, 0, 0.6);
+
+  /* Spacing (4px base grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Font Families */
+  --font-display: "Rajdhani", "Orbitron", "Saira Condensed", sans-serif;
+  --font-body: "Inter", "Roboto", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Roboto Mono", "Courier New", monospace;
+
+  /* Font Sizes */
+  --text-6xl: 56px;
+  --text-5xl: 48px;
+  --text-4xl: 36px;
+  --text-3xl: 32px;
+  --text-2xl: 24px;
+  --text-xl: 20px;
+  --text-lg: 18px;
+  --text-base: 16px;
+  --text-sm: 14px;
+  --text-xs: 12px;
+  --text-2xs: 11px;
+
+  /* Font Weights */
+  --font-light: 300;
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg-darkest: var(--bg-darkest);
+  --color-bg-dark: var(--bg-dark);
+  --color-bg-medium: var(--bg-medium);
+  --color-bg-light: var(--bg-light);
+  --color-bg-lighter: var(--bg-lighter);
+
+  --color-accent-red: var(--accent-red);
+  --color-accent-red-dark: var(--accent-red-dark);
+  --color-accent-red-bright: var(--accent-red-bright);
+  --color-accent-cyan: var(--accent-cyan);
+  --color-accent-cyan-dark: var(--accent-cyan-dark);
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-purple: var(--accent-purple);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-muted: var(--text-muted);
+  --color-text-accent: var(--text-accent);
+
+  --color-border-default: var(--border-default);
+  --color-border-bright: var(--border-bright);
+  --color-border-accent: var(--border-accent);
+
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Base Styles */
+body {
+  background: var(--bg-darkest);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  font-weight: var(--font-bold);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(255, 41, 67, 0.4), 0 0 40px rgba(255, 41, 67, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 41, 67, 0.6), 0 0 60px rgba(255, 41, 67, 0.3);
+  }
+}
+
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+/* Utility Classes */
+.fade-in {
+  animation: fadeIn 0.3s ease;
+}
+
+.slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.glow-red {
+  box-shadow: 0 0 20px rgba(255, 41, 67, 0.4), 0 0 40px rgba(255, 41, 67, 0.2),
+    0 0 60px rgba(255, 41, 67, 0.1);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 15px rgba(0, 217, 255, 0.4), 0 0 30px rgba(0, 217, 255, 0.2);
+}
+
+/* Accessibility */
+*:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Responsive Typography */
+@media (max-width: 640px) {
+  :root {
+    --text-6xl: 40px;
+    --text-5xl: 32px;
+    --text-4xl: 28px;
+  }
+}
+
+/* Button Styles */
+.btn-primary-glow {
+  box-shadow: 0 4px 12px rgba(255, 41, 67, 0.3), 0 0 20px rgba(255, 41, 67, 0.2);
+}
+
+.btn-primary-glow:hover {
+  box-shadow: 0 6px 16px rgba(255, 41, 67, 0.4), 0 0 30px rgba(255, 41, 67, 0.3);
 }

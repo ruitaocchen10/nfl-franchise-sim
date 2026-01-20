@@ -382,6 +382,393 @@ export interface Database {
         }
         Relationships: []
       }
+      games: {
+        Row: {
+          id: string
+          season_id: string
+          week: number
+          game_type: 'preseason' | 'regular' | 'wildcard' | 'divisional' | 'conference' | 'superbowl'
+          home_team_id: string
+          away_team_id: string
+          home_score: number | null
+          away_score: number | null
+          simulated: boolean
+          simulated_at: string | null
+          overtime: boolean
+          weather: 'clear' | 'rain' | 'snow' | 'wind' | 'dome'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          season_id: string
+          week: number
+          game_type?: 'preseason' | 'regular' | 'wildcard' | 'divisional' | 'conference' | 'superbowl'
+          home_team_id: string
+          away_team_id: string
+          home_score?: number | null
+          away_score?: number | null
+          simulated?: boolean
+          simulated_at?: string | null
+          overtime?: boolean
+          weather?: 'clear' | 'rain' | 'snow' | 'wind' | 'dome'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          season_id?: string
+          week?: number
+          game_type?: 'preseason' | 'regular' | 'wildcard' | 'divisional' | 'conference' | 'superbowl'
+          home_team_id?: string
+          away_team_id?: string
+          home_score?: number | null
+          away_score?: number | null
+          simulated?: boolean
+          simulated_at?: string | null
+          overtime?: boolean
+          weather?: 'clear' | 'rain' | 'snow' | 'wind' | 'dome'
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      game_stats: {
+        Row: {
+          id: string
+          game_id: string
+          player_id: string
+          team_id: string
+          pass_attempts: number
+          pass_completions: number
+          pass_yards: number
+          pass_tds: number
+          interceptions: number
+          sacks_taken: number
+          rush_attempts: number
+          rush_yards: number
+          rush_tds: number
+          fumbles: number
+          fumbles_lost: number
+          targets: number
+          receptions: number
+          receiving_yards: number
+          receiving_tds: number
+          drops: number
+          tackles: number
+          assists: number
+          sacks: number
+          tackles_for_loss: number
+          forced_fumbles: number
+          fumble_recoveries: number
+          interceptions_defense: number
+          pass_deflections: number
+          defensive_tds: number
+          field_goals_made: number
+          field_goals_attempted: number
+          longest_field_goal: number
+          extra_points_made: number
+          extra_points_attempted: number
+          punts: number
+          punt_yards: number
+          inside_20: number
+          touchbacks: number
+          kick_returns: number
+          kick_return_yards: number
+          punt_returns: number
+          punt_return_yards: number
+          return_tds: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          game_id: string
+          player_id: string
+          team_id: string
+          pass_attempts?: number
+          pass_completions?: number
+          pass_yards?: number
+          pass_tds?: number
+          interceptions?: number
+          sacks_taken?: number
+          rush_attempts?: number
+          rush_yards?: number
+          rush_tds?: number
+          fumbles?: number
+          fumbles_lost?: number
+          targets?: number
+          receptions?: number
+          receiving_yards?: number
+          receiving_tds?: number
+          drops?: number
+          tackles?: number
+          assists?: number
+          sacks?: number
+          tackles_for_loss?: number
+          forced_fumbles?: number
+          fumble_recoveries?: number
+          interceptions_defense?: number
+          pass_deflections?: number
+          defensive_tds?: number
+          field_goals_made?: number
+          field_goals_attempted?: number
+          longest_field_goal?: number
+          extra_points_made?: number
+          extra_points_attempted?: number
+          punts?: number
+          punt_yards?: number
+          inside_20?: number
+          touchbacks?: number
+          kick_returns?: number
+          kick_return_yards?: number
+          punt_returns?: number
+          punt_return_yards?: number
+          return_tds?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          game_id?: string
+          player_id?: string
+          team_id?: string
+          pass_attempts?: number
+          pass_completions?: number
+          pass_yards?: number
+          pass_tds?: number
+          interceptions?: number
+          sacks_taken?: number
+          rush_attempts?: number
+          rush_yards?: number
+          rush_tds?: number
+          fumbles?: number
+          fumbles_lost?: number
+          targets?: number
+          receptions?: number
+          receiving_yards?: number
+          receiving_tds?: number
+          drops?: number
+          tackles?: number
+          assists?: number
+          sacks?: number
+          tackles_for_loss?: number
+          forced_fumbles?: number
+          fumble_recoveries?: number
+          interceptions_defense?: number
+          pass_deflections?: number
+          defensive_tds?: number
+          field_goals_made?: number
+          field_goals_attempted?: number
+          longest_field_goal?: number
+          extra_points_made?: number
+          extra_points_attempted?: number
+          punts?: number
+          punt_yards?: number
+          inside_20?: number
+          touchbacks?: number
+          kick_returns?: number
+          kick_return_yards?: number
+          punt_returns?: number
+          punt_return_yards?: number
+          return_tds?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      game_events: {
+        Row: {
+          id: string
+          game_id: string
+          quarter: number
+          time_remaining: string
+          event_type: 'touchdown' | 'field_goal' | 'turnover' | 'injury' | 'big_play' | 'safety' | 'two_point' | 'game_winning'
+          description: string
+          player_id: string | null
+          player2_id: string | null
+          yards: number
+          scoring_play: boolean
+          points_scored: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          game_id: string
+          quarter: number
+          time_remaining: string
+          event_type: 'touchdown' | 'field_goal' | 'turnover' | 'injury' | 'big_play' | 'safety' | 'two_point' | 'game_winning'
+          description: string
+          player_id?: string | null
+          player2_id?: string | null
+          yards?: number
+          scoring_play?: boolean
+          points_scored?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          game_id?: string
+          quarter?: number
+          time_remaining?: string
+          event_type?: 'touchdown' | 'field_goal' | 'turnover' | 'injury' | 'big_play' | 'safety' | 'two_point' | 'game_winning'
+          description?: string
+          player_id?: string | null
+          player2_id?: string | null
+          yards?: number
+          scoring_play?: boolean
+          points_scored?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      season_stats: {
+        Row: {
+          id: string
+          player_id: string
+          season_id: string
+          team_id: string
+          games_played: number
+          games_started: number
+          pass_attempts: number
+          pass_completions: number
+          pass_yards: number
+          pass_tds: number
+          interceptions: number
+          sacks_taken: number
+          rush_attempts: number
+          rush_yards: number
+          rush_tds: number
+          fumbles: number
+          fumbles_lost: number
+          targets: number
+          receptions: number
+          receiving_yards: number
+          receiving_tds: number
+          drops: number
+          tackles: number
+          assists: number
+          sacks: number
+          tackles_for_loss: number
+          forced_fumbles: number
+          fumble_recoveries: number
+          interceptions_defense: number
+          pass_deflections: number
+          defensive_tds: number
+          field_goals_made: number
+          field_goals_attempted: number
+          longest_field_goal: number
+          extra_points_made: number
+          extra_points_attempted: number
+          punts: number
+          punt_yards: number
+          inside_20: number
+          touchbacks: number
+          kick_returns: number
+          kick_return_yards: number
+          punt_returns: number
+          punt_return_yards: number
+          return_tds: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          player_id: string
+          season_id: string
+          team_id: string
+          games_played?: number
+          games_started?: number
+          pass_attempts?: number
+          pass_completions?: number
+          pass_yards?: number
+          pass_tds?: number
+          interceptions?: number
+          sacks_taken?: number
+          rush_attempts?: number
+          rush_yards?: number
+          rush_tds?: number
+          fumbles?: number
+          fumbles_lost?: number
+          targets?: number
+          receptions?: number
+          receiving_yards?: number
+          receiving_tds?: number
+          drops?: number
+          tackles?: number
+          assists?: number
+          sacks?: number
+          tackles_for_loss?: number
+          forced_fumbles?: number
+          fumble_recoveries?: number
+          interceptions_defense?: number
+          pass_deflections?: number
+          defensive_tds?: number
+          field_goals_made?: number
+          field_goals_attempted?: number
+          longest_field_goal?: number
+          extra_points_made?: number
+          extra_points_attempted?: number
+          punts?: number
+          punt_yards?: number
+          inside_20?: number
+          touchbacks?: number
+          kick_returns?: number
+          kick_return_yards?: number
+          punt_returns?: number
+          punt_return_yards?: number
+          return_tds?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          player_id?: string
+          season_id?: string
+          team_id?: string
+          games_played?: number
+          games_started?: number
+          pass_attempts?: number
+          pass_completions?: number
+          pass_yards?: number
+          pass_tds?: number
+          interceptions?: number
+          sacks_taken?: number
+          rush_attempts?: number
+          rush_yards?: number
+          rush_tds?: number
+          fumbles?: number
+          fumbles_lost?: number
+          targets?: number
+          receptions?: number
+          receiving_yards?: number
+          receiving_tds?: number
+          drops?: number
+          tackles?: number
+          assists?: number
+          sacks?: number
+          tackles_for_loss?: number
+          forced_fumbles?: number
+          fumble_recoveries?: number
+          interceptions_defense?: number
+          pass_deflections?: number
+          defensive_tds?: number
+          field_goals_made?: number
+          field_goals_attempted?: number
+          longest_field_goal?: number
+          extra_points_made?: number
+          extra_points_attempted?: number
+          punts?: number
+          punt_yards?: number
+          inside_20?: number
+          touchbacks?: number
+          kick_returns?: number
+          kick_return_yards?: number
+          punt_returns?: number
+          punt_return_yards?: number
+          return_tds?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -396,6 +783,9 @@ export interface Database {
       season_phase: 'preseason' | 'regular' | 'playoffs' | 'offseason' | 'draft' | 'free_agency'
       player_status: 'active' | 'injured_reserve' | 'practice_squad' | 'inactive'
       development_trait: 'superstar' | 'star' | 'normal' | 'slow'
+      game_type: 'preseason' | 'regular' | 'wildcard' | 'divisional' | 'conference' | 'superbowl'
+      weather_type: 'clear' | 'rain' | 'snow' | 'wind' | 'dome'
+      event_type: 'touchdown' | 'field_goal' | 'turnover' | 'injury' | 'big_play' | 'safety' | 'two_point' | 'game_winning'
     }
   }
 }

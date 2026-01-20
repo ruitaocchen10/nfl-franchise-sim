@@ -196,7 +196,7 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
                       href={`/franchise/${id}/schedule`}
                       title="Schedule"
                       description="Simulate games"
-                      disabled={true}
+                      disabled={false}
                     />
                     <QuickActionButton
                       href="/dashboard"

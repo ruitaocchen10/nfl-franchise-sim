@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/types/database.types";
+import { generateSchedule } from "@/lib/schedule/scheduleGenerator";
 
 type Team = Database["public"]["Tables"]["teams"]["Row"];
 
@@ -106,9 +107,9 @@ export async function createFranchise(data: CreateFranchiseData) {
   }
 
   // Get all 32 teams to initialize standings and finances
-  const { data: allTeams, error: teamsError } = await supabase
+  const { data: allTeams, error: teamsError} = await supabase
     .from("teams")
-    .select("id");
+    .select("*");
 
   if (teamsError || !allTeams) {
     console.error("Teams fetch error:", teamsError);
@@ -329,6 +330,33 @@ export async function createFranchise(data: CreateFranchiseData) {
   }
 
   console.log("✅ Contracts copied");
+
+  // ============================================================================
+  // GENERATE SCHEDULE
+  // ============================================================================
+
+  console.log("📅 Generating season schedule...");
+
+  // Generate the schedule for all 32 teams
+  const scheduleGames = generateSchedule(allTeams, season.id, season.year);
+
+  // Insert games in batches to avoid timeout
+  const batchSize = 100;
+  for (let i = 0; i < scheduleGames.length; i += batchSize) {
+    const batch = scheduleGames.slice(i, i + batchSize);
+    const { error: gamesError } = await supabase.from("games").insert(batch);
+
+    if (gamesError) {
+      console.error("Error inserting games batch:", gamesError);
+      throw new Error("Failed to create schedule");
+    }
+
+    console.log(
+      `   Inserted games ${i + 1}-${Math.min(i + batchSize, scheduleGames.length)} of ${scheduleGames.length}`,
+    );
+  }
+
+  console.log(`✅ Created ${scheduleGames.length} games`);
   console.log("🎉 Franchise setup complete!");
 
   // Revalidate and redirect

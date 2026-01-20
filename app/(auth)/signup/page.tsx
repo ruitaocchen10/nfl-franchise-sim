@@ -8,20 +8,20 @@ import Link from "next/link";
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-bg-darkest py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 fade-in">
         <div>
-          <h1 className="text-center text-4xl font-bold text-gray-900">
+          <h1 className="text-center text-5xl font-bold text-text-primary uppercase tracking-wider" style={{ fontFamily: "var(--font-display)", textShadow: "0 0 20px var(--glow-red)" }}>
             NFL Franchise Simulator
           </h1>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-8 text-center text-3xl font-bold text-text-primary uppercase" style={{ fontFamily: "var(--font-display)", letterSpacing: "0.05em" }}>
             Create your account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-3 text-center text-sm text-text-secondary">
             Already have an account?{" "}
             <Link
               href="/login"
-              className="font-medium text-blue-600 hover:text-blue-500"
+              className="font-medium text-accent-cyan hover:text-accent-cyan-dark transition-colors"
             >
               Sign in
             </Link>
@@ -29,7 +29,7 @@ export default function SignupPage() {
         </div>
 
         <form className="mt-8 space-y-6" action={signup}>
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="space-y-4">
             <div>
               <label htmlFor="email" className="sr-only">
                 Email address
@@ -40,8 +40,9 @@ export default function SignupPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className="appearance-none relative block w-full px-4 py-3 bg-bg-light border border-border-default text-text-primary placeholder-text-muted rounded-md focus:outline-none focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan sm:text-sm transition-all"
                 placeholder="Email address"
+                style={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)" }}
               />
             </div>
             <div>
@@ -55,8 +56,9 @@ export default function SignupPage() {
                 autoComplete="new-password"
                 required
                 minLength={6}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className="appearance-none relative block w-full px-4 py-3 bg-bg-light border border-border-default text-text-primary placeholder-text-muted rounded-md focus:outline-none focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan sm:text-sm transition-all"
                 placeholder="Password (min 6 characters)"
+                style={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)" }}
               />
             </div>
             <div>
@@ -70,8 +72,9 @@ export default function SignupPage() {
                 autoComplete="new-password"
                 required
                 minLength={6}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className="appearance-none relative block w-full px-4 py-3 bg-bg-light border border-border-default text-text-primary placeholder-text-muted rounded-md focus:outline-none focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan sm:text-sm transition-all"
                 placeholder="Confirm password"
+                style={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)" }}
               />
             </div>
           </div>
@@ -82,11 +85,11 @@ export default function SignupPage() {
               name="terms"
               type="checkbox"
               required
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 bg-bg-light border-border-default rounded focus:ring-accent-cyan accent-accent-red"
             />
-            <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
+            <label htmlFor="terms" className="ml-2 block text-sm text-text-secondary">
               I agree to the{" "}
-              <a href="#" className="text-blue-600 hover:text-blue-500">
+              <a href="#" className="text-accent-cyan hover:text-accent-cyan-dark transition-colors">
                 Terms and Conditions
               </a>
             </label>
@@ -95,7 +98,11 @@ export default function SignupPage() {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="btn-primary-glow group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold uppercase tracking-wider rounded-lg text-white transition-all hover:-translate-y-0.5"
+              style={{
+                fontFamily: "var(--font-display)",
+                background: "linear-gradient(135deg, #ff2943 0%, #ff3d5c 100%)",
+              }}
             >
               Create account
             </button>

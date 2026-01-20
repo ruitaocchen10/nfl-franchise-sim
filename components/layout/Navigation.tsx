@@ -24,13 +24,13 @@ export default function Navigation({ userEmail }: NavigationProps) {
   ];
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200">
+    <nav className="bg-bg-dark shadow-sm border-b border-border-default" style={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.4)" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo and Nav Items */}
           <div className="flex items-center space-x-8">
             <Link href="/dashboard" className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-text-primary uppercase tracking-wide" style={{ fontFamily: "var(--font-display)", textShadow: "0 0 15px var(--glow-red)" }}>
                 NFL Franchise Simulator
               </h1>
             </Link>
@@ -42,11 +42,12 @@ export default function Navigation({ userEmail }: NavigationProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                    "inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all uppercase tracking-wider",
                     pathname === item.href
-                      ? "bg-blue-50 text-blue-700"
-                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
+                      ? "bg-bg-light text-accent-cyan border border-accent-cyan"
+                      : "text-text-secondary hover:bg-bg-medium hover:text-text-primary border border-transparent",
                   )}
+                  style={{ fontFamily: "var(--font-display)" }}
                 >
                   {item.name}
                 </Link>
@@ -57,14 +58,15 @@ export default function Navigation({ userEmail }: NavigationProps) {
           {/* User Menu */}
           <div className="flex items-center space-x-4">
             {userEmail && (
-              <span className="text-sm text-gray-700 hidden sm:block">
+              <span className="text-sm text-text-secondary hidden sm:block">
                 {userEmail}
               </span>
             )}
             <form action={logout}>
               <button
                 type="submit"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="inline-flex items-center px-4 py-2 border border-border-default text-sm font-medium rounded-md text-text-secondary bg-bg-medium hover:bg-bg-light hover:text-text-primary hover:border-border-bright focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all uppercase tracking-wide"
+                style={{ fontFamily: "var(--font-display)" }}
               >
                 Sign out
               </button>
