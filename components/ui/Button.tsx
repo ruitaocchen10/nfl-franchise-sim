@@ -21,20 +21,21 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       isLoading,
       children,
       disabled,
+      style,
       ...props
     },
     ref,
   ) => {
     const baseStyles =
-      "inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+      "inline-flex items-center justify-center font-bold rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider";
 
     const variants = {
-      primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
+      primary: "btn-primary-glow text-white hover:-translate-y-0.5",
       secondary:
-        "bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500",
-      danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
+        "border-2 border-accent-cyan text-accent-cyan bg-transparent hover:bg-accent-cyan hover:bg-opacity-10 focus:ring-accent-cyan",
+      danger: "bg-bg-medium text-error border border-error hover:bg-opacity-10 focus:ring-error",
       ghost:
-        "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-500",
+        "bg-transparent text-text-secondary border border-border-default hover:bg-bg-light hover:text-text-primary hover:border-border-bright focus:ring-accent-cyan",
     };
 
     const sizes = {
@@ -43,11 +44,21 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       lg: "px-6 py-3 text-lg",
     };
 
+    const variantStyles = variant === "primary" ? {
+      fontFamily: "var(--font-display)",
+      background: "linear-gradient(135deg, #ff2943 0%, #ff3d5c 100%)",
+      ...style
+    } : {
+      fontFamily: "var(--font-display)",
+      ...style
+    };
+
     return (
       <button
         ref={ref}
         className={cn(baseStyles, variants[variant], sizes[size], className)}
         disabled={disabled || isLoading}
+        style={variantStyles}
         {...props}
       >
         {isLoading && (

@@ -11,7 +11,7 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ className, padding = 'md', children, ...props }, ref) => {
+  ({ className, padding = 'md', children, style, ...props }, ref) => {
     const paddingStyles = {
       none: 'p-0',
       sm: 'p-4',
@@ -23,10 +23,16 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          'bg-white rounded-lg shadow-md border border-gray-200',
+          'rounded-lg border transition-all',
           paddingStyles[padding],
           className
         )}
+        style={{
+          background: 'var(--bg-medium)',
+          borderColor: 'var(--border-default)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
+          ...style
+        }}
         {...props}
       >
         {children}
@@ -38,10 +44,14 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
 Card.displayName = 'Card'
 
 export const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
+  ({ className, style, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('border-b border-gray-200 pb-4 mb-4', className)}
+      className={cn('pb-4 mb-4', className)}
+      style={{
+        borderBottom: '1px solid var(--border-default)',
+        ...style
+      }}
       {...props}
     />
   )
@@ -50,10 +60,15 @@ export const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEleme
 CardHeader.displayName = 'CardHeader'
 
 export const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingElement>>(
-  ({ className, ...props }, ref) => (
+  ({ className, style, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('text-2xl font-bold text-gray-900', className)}
+      className={cn('text-2xl font-bold uppercase tracking-wide', className)}
+      style={{
+        fontFamily: 'var(--font-display)',
+        color: 'var(--text-primary)',
+        ...style
+      }}
       {...props}
     />
   )

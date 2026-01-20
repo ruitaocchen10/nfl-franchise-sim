@@ -45,7 +45,11 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
       <div className="fixed inset-0 z-50 overflow-y-auto">
         {/* Backdrop */}
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+          className="fixed inset-0 transition-opacity"
+          style={{
+            background: 'rgba(6, 8, 16, 0.8)',
+            backdropFilter: 'blur(8px)'
+          }}
           onClick={onClose}
           aria-hidden="true"
         />
@@ -55,20 +59,34 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
           <div
             ref={ref}
             className={cn(
-              'relative bg-white rounded-lg shadow-xl w-full',
+              'relative rounded-2xl w-full',
               sizes[size],
               className
             )}
+            style={{
+              background: 'var(--bg-medium)',
+              border: '1px solid var(--border-bright)',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6), 0 0 60px rgba(255, 41, 67, 0.15)'
+            }}
             onClick={(e) => e.stopPropagation()}
             {...props}
           >
             {/* Header */}
             {title && (
-              <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-                <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+              <div className="flex items-center justify-between px-6 py-4 rounded-t-2xl" style={{
+                background: 'var(--bg-light)',
+                borderBottom: '1px solid var(--border-default)'
+              }}>
+                <h2 className="text-xl font-bold uppercase tracking-wide" style={{
+                  fontFamily: 'var(--font-display)',
+                  color: 'var(--text-primary)'
+                }}>{title}</h2>
                 <button
                   onClick={onClose}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="transition-colors"
+                  style={{ color: 'var(--text-tertiary)' }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-tertiary)'}
                   aria-label="Close modal"
                 >
                   <svg

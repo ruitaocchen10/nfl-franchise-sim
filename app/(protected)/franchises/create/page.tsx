@@ -23,13 +23,13 @@ export default async function CreateFranchisePage() {
   const teams = await getAllTeams();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-bg-darkest py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+        <div className="text-center mb-8 slide-up">
+          <h1 className="text-3xl font-bold uppercase tracking-wide" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', textShadow: '0 0 20px var(--glow-red)' }}>
             Create Your Franchise
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2" style={{ color: 'var(--text-secondary)' }}>
             Choose your team and start building a championship dynasty
           </p>
         </div>

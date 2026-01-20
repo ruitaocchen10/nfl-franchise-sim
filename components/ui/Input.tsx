@@ -13,7 +13,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, helperText, id, ...props }, ref) => {
+  ({ className, label, error, helperText, id, style, ...props }, ref) => {
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-')
 
     return (
@@ -21,7 +21,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium mb-1"
+            style={{ color: 'var(--text-secondary)' }}
           >
             {label}
           </label>
@@ -30,25 +31,33 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'w-full px-3 py-2 border rounded-md shadow-sm text-gray-900',
-            'focus:outline-none focus:ring-2 focus:ring-offset-0',
-            'disabled:bg-gray-100 disabled:cursor-not-allowed',
+            'w-full px-4 py-3 border rounded-md shadow-sm',
+            'focus:outline-none focus:ring-1',
+            'disabled:opacity-50 disabled:cursor-not-allowed',
+            'transition-all',
             error
-              ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500',
+              ? 'border-error focus:ring-error focus:border-error'
+              : 'focus:ring-accent-cyan focus:border-accent-cyan',
             className
           )}
+          style={{
+            background: 'var(--bg-light)',
+            borderColor: error ? 'var(--error)' : 'var(--border-default)',
+            color: 'var(--text-primary)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            ...style
+          }}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined}
           {...props}
         />
         {error && (
-          <p id={`${inputId}-error`} className="mt-1 text-sm text-red-600">
+          <p id={`${inputId}-error`} className="mt-1 text-sm" style={{ color: 'var(--error)' }}>
             {error}
           </p>
         )}
         {!error && helperText && (
-          <p id={`${inputId}-helper`} className="mt-1 text-sm text-gray-500">
+          <p id={`${inputId}-helper`} className="mt-1 text-sm" style={{ color: 'var(--text-tertiary)' }}>
             {helperText}
           </p>
         )}

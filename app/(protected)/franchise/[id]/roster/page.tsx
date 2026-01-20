@@ -35,26 +35,33 @@ export default async function RosterPage({ params }: RosterPageProps) {
   const roster = await getFranchiseRoster(id);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-bg-darkest">
       <Navigation userEmail={user.email} />
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           {/* Header */}
-          <div className="mb-6">
+          <div className="mb-6 slide-up">
             <div className="flex items-center gap-4 mb-2">
               <div
-                className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg"
-                style={{ backgroundColor: team.primary_color }}
+                className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-lg"
+                style={{
+                  backgroundColor: team.primary_color,
+                  fontFamily: 'var(--font-mono)',
+                  boxShadow: `0 4px 16px ${team.primary_color}40`
+                }}
               >
                 {team.abbreviation}
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-3xl font-bold uppercase tracking-wide" style={{
+                  fontFamily: 'var(--font-display)',
+                  color: 'var(--text-primary)'
+                }}>
                   {team.city} {team.name} Roster
                 </h1>
-                <p className="text-gray-600">
-                  {season.year} Season • {roster.length} Players
+                <p style={{ color: 'var(--text-secondary)' }}>
+                  {season.year} Season • <span style={{ fontFamily: 'var(--font-mono)' }}>{roster.length}</span> Players
                 </p>
               </div>
             </div>

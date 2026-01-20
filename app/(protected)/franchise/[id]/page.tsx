@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import Navigation from "@/components/layout/Navigation";
 import { getFranchiseById } from "@/app/actions/franchises";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
-import Link from "next/link";
+import QuickActionButton from "./QuickActionButton";
 
 interface FranchisePageProps {
   params: Promise<{ id: string }>;
@@ -34,24 +34,31 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
   const season = franchise.current_season as any;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-bg-darkest">
       <Navigation userEmail={user.email} />
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           {/* Header with team branding */}
-          <div className="mb-6 flex items-center gap-4">
+          <div className="mb-6 flex items-center gap-4 slide-up">
             <div
-              className="w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-2xl"
-              style={{ backgroundColor: team.primary_color }}
+              className="w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-2xl shadow-lg"
+              style={{
+                backgroundColor: team.primary_color,
+                fontFamily: 'var(--font-mono)',
+                boxShadow: `0 4px 16px ${team.primary_color}40`
+              }}
             >
               {team.abbreviation}
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-3xl font-bold uppercase tracking-wide" style={{
+                fontFamily: 'var(--font-display)',
+                color: 'var(--text-primary)'
+              }}>
                 {franchise.franchise_name}
               </h1>
-              <p className="text-gray-600">
+              <p style={{ color: 'var(--text-secondary)' }}>
                 {team.city} {team.name} • {season.year} Season
               </p>
             </div>
@@ -62,8 +69,14 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <p className="text-sm text-gray-600">Season</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm uppercase tracking-wider font-semibold mb-2" style={{
+                    fontFamily: 'var(--font-display)',
+                    color: 'var(--text-tertiary)'
+                  }}>Season</p>
+                  <p className="text-2xl font-bold" style={{
+                    fontFamily: 'var(--font-mono)',
+                    color: 'var(--text-primary)'
+                  }}>
                     {season.year}
                   </p>
                 </div>
@@ -73,8 +86,14 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <p className="text-sm text-gray-600">Phase</p>
-                  <p className="text-2xl font-bold text-gray-900 capitalize">
+                  <p className="text-sm uppercase tracking-wider font-semibold mb-2" style={{
+                    fontFamily: 'var(--font-display)',
+                    color: 'var(--text-tertiary)'
+                  }}>Phase</p>
+                  <p className="text-2xl font-bold capitalize" style={{
+                    fontFamily: 'var(--font-mono)',
+                    color: 'var(--text-primary)'
+                  }}>
                     {season.phase}
                   </p>
                 </div>
@@ -84,8 +103,14 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <p className="text-sm text-gray-600">Week</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm uppercase tracking-wider font-semibold mb-2" style={{
+                    fontFamily: 'var(--font-display)',
+                    color: 'var(--text-tertiary)'
+                  }}>Week</p>
+                  <p className="text-2xl font-bold" style={{
+                    fontFamily: 'var(--font-mono)',
+                    color: 'var(--text-primary)'
+                  }}>
                     {season.current_week}
                   </p>
                 </div>
@@ -95,8 +120,14 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <p className="text-sm text-gray-600">Difficulty</p>
-                  <p className="text-2xl font-bold text-gray-900 capitalize">
+                  <p className="text-sm uppercase tracking-wider font-semibold mb-2" style={{
+                    fontFamily: 'var(--font-display)',
+                    color: 'var(--text-tertiary)'
+                  }}>Difficulty</p>
+                  <p className="text-2xl font-bold capitalize" style={{
+                    fontFamily: 'var(--font-mono)',
+                    color: 'var(--text-primary)'
+                  }}>
                     {franchise.difficulty}
                   </p>
                 </div>
@@ -114,54 +145,66 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <p className="text-gray-600">
+                    <p style={{ color: 'var(--text-secondary)' }}>
                       Your franchise has been created successfully! You're
                       starting in the{" "}
-                      <span className="font-semibold">{season.phase}</span>{" "}
+                      <span className="font-semibold" style={{ color: 'var(--accent-cyan)' }}>{season.phase}</span>{" "}
                       phase of the {season.year} season.
                     </p>
 
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <h3 className="font-semibold text-green-900 mb-2">
+                    <div className="rounded-lg p-4 border" style={{
+                      background: 'rgba(0, 255, 136, 0.1)',
+                      borderColor: 'var(--success)'
+                    }}>
+                      <h3 className="font-semibold mb-2 uppercase tracking-wide" style={{
+                        fontFamily: 'var(--font-display)',
+                        color: 'var(--success)'
+                      }}>
                         ✓ Roster Loaded!
                       </h3>
-                      <p className="text-sm text-green-800 mb-3">
+                      <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
                         Your team's roster has been populated with player data.
                         Click on "Roster" above to view your players.
                       </p>
                     </div>
 
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h3 className="font-semibold text-blue-900 mb-2">
+                    <div className="rounded-lg p-4 border" style={{
+                      background: 'rgba(0, 217, 255, 0.1)',
+                      borderColor: 'var(--accent-cyan)'
+                    }}>
+                      <h3 className="font-semibold mb-3 uppercase tracking-wide" style={{
+                        fontFamily: 'var(--font-display)',
+                        color: 'var(--accent-cyan)'
+                      }}>
                         Next Steps
                       </h3>
-                      <ul className="space-y-2 text-sm text-blue-800">
+                      <ul className="space-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
                         <li className="flex items-start gap-2">
-                          <span className="text-green-600">✓</span>
+                          <span style={{ color: 'var(--success)' }}>✓</span>
                           <span>
-                            <strong>View your roster:</strong> Check out your
+                            <strong style={{ color: 'var(--text-primary)' }}>View your roster:</strong> Check out your
                             team's players, ratings, and attributes
                           </span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600">2.</span>
+                          <span style={{ color: 'var(--accent-cyan)' }}>2.</span>
                           <span>
-                            <strong>Set your depth chart:</strong> Organize your
+                            <strong style={{ color: 'var(--text-primary)' }}>Set your depth chart:</strong> Organize your
                             starting lineup and backups (coming soon)
                           </span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600">3.</span>
+                          <span style={{ color: 'var(--accent-cyan)' }}>3.</span>
                           <span>
-                            <strong>Simulate games:</strong> Progress through
+                            <strong style={{ color: 'var(--text-primary)' }}>Simulate games:</strong> Progress through
                             the season and compete for the playoffs (coming
                             soon)
                           </span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600">4.</span>
+                          <span style={{ color: 'var(--accent-cyan)' }}>4.</span>
                           <span>
-                            <strong>Make moves:</strong> Trade players, sign
+                            <strong style={{ color: 'var(--text-primary)' }}>Make moves:</strong> Trade players, sign
                             free agents, and draft rookies (coming soon)
                           </span>
                         </li>
@@ -215,26 +258,43 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
                 <CardContent>
                   <div className="space-y-3 text-sm">
                     <div>
-                      <p className="text-gray-600">Conference</p>
-                      <p className="font-semibold">{team.conference}</p>
+                      <p className="uppercase tracking-wider font-semibold mb-1" style={{
+                        fontFamily: 'var(--font-display)',
+                        color: 'var(--text-tertiary)'
+                      }}>Conference</p>
+                      <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{team.conference}</p>
                     </div>
                     <div>
-                      <p className="text-gray-600">Division</p>
-                      <p className="font-semibold">
+                      <p className="uppercase tracking-wider font-semibold mb-1" style={{
+                        fontFamily: 'var(--font-display)',
+                        color: 'var(--text-tertiary)'
+                      }}>Division</p>
+                      <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                         {team.conference} {team.division}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-600">Team Colors</p>
+                      <p className="uppercase tracking-wider font-semibold mb-1" style={{
+                        fontFamily: 'var(--font-display)',
+                        color: 'var(--text-tertiary)'
+                      }}>Team Colors</p>
                       <div className="flex gap-2 mt-1">
                         <div
-                          className="w-8 h-8 rounded border border-gray-300"
-                          style={{ backgroundColor: team.primary_color }}
+                          className="w-8 h-8 rounded border shadow-md"
+                          style={{
+                            backgroundColor: team.primary_color,
+                            borderColor: 'var(--border-bright)',
+                            boxShadow: `0 2px 8px ${team.primary_color}40`
+                          }}
                           title={team.primary_color}
                         />
                         <div
-                          className="w-8 h-8 rounded border border-gray-300"
-                          style={{ backgroundColor: team.secondary_color }}
+                          className="w-8 h-8 rounded border shadow-md"
+                          style={{
+                            backgroundColor: team.secondary_color,
+                            borderColor: 'var(--border-bright)',
+                            boxShadow: `0 2px 8px ${team.secondary_color}40`
+                          }}
                           title={team.secondary_color}
                         />
                       </div>
@@ -247,48 +307,5 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
         </div>
       </main>
     </div>
-  );
-}
-
-interface QuickActionButtonProps {
-  href: string;
-  title: string;
-  description: string;
-  disabled?: boolean;
-}
-
-function QuickActionButton({
-  href,
-  title,
-  description,
-  disabled = false,
-}: QuickActionButtonProps) {
-  const baseClasses =
-    "block w-full px-4 py-3 rounded-lg border text-left transition-colors";
-  const enabledClasses =
-    "border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50";
-  const disabledClasses =
-    "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed";
-
-  const content = (
-    <>
-      <p className="font-semibold text-gray-900">{title}</p>
-      <p className="text-sm text-gray-600 mt-0.5">{description}</p>
-      {disabled && (
-        <span className="inline-block mt-1 text-xs text-gray-500">
-          Coming soon
-        </span>
-      )}
-    </>
-  );
-
-  if (disabled) {
-    return <div className={`${baseClasses} ${disabledClasses}`}>{content}</div>;
-  }
-
-  return (
-    <Link href={href} className={`${baseClasses} ${enabledClasses}`}>
-      {content}
-    </Link>
   );
 }

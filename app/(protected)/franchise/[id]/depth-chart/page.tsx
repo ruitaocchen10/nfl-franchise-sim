@@ -33,15 +33,18 @@ export default async function DepthChartPage({ params }: DepthChartPageProps) {
   const depthChart = await getDepthChart(id);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-bg-darkest">
       <Navigation userEmail={user.email} />
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Depth Chart</h1>
-            <p className="mt-2 text-gray-600">
+          <div className="mb-6 slide-up">
+            <h1 className="text-3xl font-bold uppercase tracking-wide" style={{
+              fontFamily: 'var(--font-display)',
+              color: 'var(--text-primary)'
+            }}>Depth Chart</h1>
+            <p className="mt-2" style={{ color: 'var(--text-secondary)' }}>
               Manage your team's starting lineup and backups
             </p>
           </div>
