@@ -415,3 +415,45 @@ export async function getAllTeams(): Promise<Team[]> {
 
   return teams || [];
 }
+
+export async function deleteFranchise(
+  franchiseId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+
+  // Get current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  // Verify user owns this franchise
+  const { data: franchise, error: franchiseError } = await supabase
+    .from("franchises")
+    .select("id")
+    .eq("id", franchiseId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (franchiseError || !franchise) {
+    return { success: false, error: "Franchise not found" };
+  }
+
+  // Soft delete: set is_active to false
+  const { error: updateError } = await supabase
+    .from("franchises")
+    .update({ is_active: false })
+    .eq("id", franchiseId);
+
+  if (updateError) {
+    console.error("Error deleting franchise:", updateError);
+    return { success: false, error: "Failed to delete franchise" };
+  }
+
+  // Revalidate the dashboard to show updated franchise list
+  revalidatePath("/dashboard");
+
+  return { success: true };
+}

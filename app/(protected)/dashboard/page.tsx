@@ -9,6 +9,7 @@ import Navigation from "@/components/layout/Navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
 import Link from "next/link";
 import { getFranchises } from "@/app/actions/franchises";
+import DeleteFranchiseButton from "./DeleteFranchiseButton";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -108,26 +109,33 @@ function FranchiseCard({ franchise }: FranchiseCardProps) {
   const season = franchise.current_season;
 
   return (
-    <Link href={`/franchise/${franchise.id}`}>
-      <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-        <CardHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div
-              className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold"
-              style={{ backgroundColor: team.primary_color }}
-            >
-              {team.abbreviation}
+    <div className="relative">
+      <Link href={`/franchise/${franchise.id}`}>
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+          <CardHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div
+                className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold"
+                style={{ backgroundColor: team.primary_color }}
+              >
+                {team.abbreviation}
+              </div>
+              <div className="flex-1 min-w-0">
+                <CardTitle className="text-lg truncate">
+                  {franchise.franchise_name}
+                </CardTitle>
+                <p className="text-sm text-gray-600 truncate">
+                  {team.city} {team.name}
+                </p>
+              </div>
+              <div className="flex-shrink-0">
+                <DeleteFranchiseButton
+                  franchiseId={franchise.id}
+                  franchiseName={franchise.franchise_name}
+                />
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg truncate">
-                {franchise.franchise_name}
-              </CardTitle>
-              <p className="text-sm text-gray-600 truncate">
-                {team.city} {team.name}
-              </p>
-            </div>
-          </div>
-        </CardHeader>
+          </CardHeader>
         <CardContent>
           <div className="space-y-3">
             <div className="flex justify-between text-sm">
@@ -158,5 +166,6 @@ function FranchiseCard({ franchise }: FranchiseCardProps) {
         </CardContent>
       </Card>
     </Link>
+    </div>
   );
 }

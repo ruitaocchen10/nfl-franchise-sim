@@ -190,7 +190,7 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
                       href={`/franchise/${id}/depth-chart`}
                       title="Depth Chart"
                       description="Set your lineup"
-                      disabled={true}
+                      disabled={false}
                     />
                     <QuickActionButton
                       href={`/franchise/${id}/schedule`}
