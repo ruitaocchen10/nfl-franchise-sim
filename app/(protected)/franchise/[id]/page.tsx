@@ -224,6 +224,12 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
                 <CardContent>
                   <div className="space-y-3">
                     <QuickActionButton
+                      href={`/franchise/${id}/manage`}
+                      title="Manage Franchise"
+                      description="Rosters, trades, finances"
+                      disabled={false}
+                    />
+                    <QuickActionButton
                       href={`/franchise/${id}/roster`}
                       title="Roster"
                       description="View your players"

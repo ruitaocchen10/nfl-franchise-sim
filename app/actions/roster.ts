@@ -363,3 +363,169 @@ export async function updateDepthPosition(
 
   return { success: true };
 }
+
+export interface LeagueRosterPlayer extends RosterPlayer {
+  team: {
+    id: string;
+    abbreviation: string;
+    city: string;
+    name: string;
+    primary_color: string;
+    secondary_color: string;
+  };
+}
+
+export async function getLeagueRosters(
+  franchiseId: string,
+  teamId?: string,
+): Promise<LeagueRosterPlayer[]> {
+  const supabase = await createClient();
+
+  // Get current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  // Get franchise with season info
+  const { data: franchise, error: franchiseError } = await supabase
+    .from("franchises")
+    .select(
+      `
+      id,
+      current_season_id
+    `,
+    )
+    .eq("id", franchiseId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (franchiseError || !franchise || !franchise.current_season_id) {
+    console.error("Error fetching franchise:", franchiseError);
+    return [];
+  }
+
+  // Build the roster query
+  let rosterQuery = supabase
+    .from("roster_spots")
+    .select(
+      `
+      id,
+      jersey_number,
+      status,
+      depth_position,
+      player_id,
+      team_id,
+      players (
+        id,
+        first_name,
+        last_name,
+        position,
+        college,
+        draft_year,
+        draft_round,
+        draft_pick,
+        height_inches,
+        weight_lbs
+      ),
+      teams (
+        id,
+        abbreviation,
+        city,
+        name,
+        primary_color,
+        secondary_color
+      )
+    `,
+    )
+    .eq("season_id", franchise.current_season_id);
+
+  // If teamId is provided, filter by team
+  if (teamId) {
+    rosterQuery = rosterQuery.eq("team_id", teamId);
+  }
+
+  const { data: rosterSpots, error: rosterError } = await rosterQuery;
+
+  if (rosterError) {
+    console.error("Error fetching league rosters:", rosterError);
+    return [];
+  }
+
+  if (!rosterSpots || rosterSpots.length === 0) {
+    return [];
+  }
+
+  // Get player attributes for all players (single team only, ~53 players)
+  const playerIds = rosterSpots.map((spot) => spot.player_id);
+  const { data: attributes, error: attributesError } = await supabase
+    .from("player_attributes")
+    .select("*")
+    .in("player_id", playerIds)
+    .eq("season_id", franchise.current_season_id);
+
+  if (attributesError) {
+    console.error("Error fetching attributes:", attributesError);
+    return [];
+  }
+
+  // Create a map of player attributes
+  const attributesMap = new Map(
+    attributes?.map((attr) => [attr.player_id, attr]) || [],
+  );
+
+  // Combine the data
+  const leagueRoster: LeagueRosterPlayer[] = rosterSpots
+    .map((spot: any) => {
+      const player = spot.players;
+      const team = spot.teams;
+      const attrs = attributesMap.get(spot.player_id);
+
+      if (!player || !attrs || !team) {
+        return null;
+      }
+
+      return {
+        id: player.id,
+        first_name: player.first_name,
+        last_name: player.last_name,
+        position: player.position,
+        college: player.college,
+        draft_year: player.draft_year,
+        draft_round: player.draft_round,
+        draft_pick: player.draft_pick,
+        height_inches: player.height_inches,
+        weight_lbs: player.weight_lbs,
+        attributes: {
+          age: attrs.age,
+          overall_rating: attrs.overall_rating,
+          speed: attrs.speed,
+          strength: attrs.strength,
+          agility: attrs.agility,
+          awareness: attrs.awareness,
+          injury_prone: attrs.injury_prone,
+          development_trait: attrs.development_trait,
+          morale: attrs.morale,
+          years_pro: attrs.years_pro,
+        },
+        roster_spot: {
+          jersey_number: spot.jersey_number,
+          status: spot.status,
+          depth_position: spot.depth_position,
+        },
+        team: {
+          id: team.id,
+          abbreviation: team.abbreviation,
+          city: team.city,
+          name: team.name,
+          primary_color: team.primary_color,
+          secondary_color: team.secondary_color,
+        },
+      };
+    })
+    .filter((p): p is LeagueRosterPlayer => p !== null);
+
+  return leagueRoster;
+}
