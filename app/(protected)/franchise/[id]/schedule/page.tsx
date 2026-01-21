@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getFranchiseById } from "@/app/actions/franchises";
 import { getSchedule } from "@/app/actions/simulation";
-import Navigation from "@/components/layout/Navigation";
+import FranchiseNavigation from "@/components/layout/FranchiseNavigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
 import SimulateGameButton from "./SimulateGameButton";
 import SimulateWeekButton from "./SimulateWeekButton";
@@ -56,7 +56,22 @@ export default async function SchedulePage({ params }: SchedulePageProps) {
 
   return (
     <div className="min-h-screen bg-bg-darkest">
-      <Navigation userEmail={user.email} />
+      <FranchiseNavigation
+        franchiseId={id}
+        teamData={{
+          abbreviation: team.abbreviation,
+          city: team.city,
+          name: team.name,
+          primary_color: team.primary_color,
+          secondary_color: team.secondary_color,
+        }}
+        seasonData={{
+          year: season.year,
+          current_week: season.current_week,
+          phase: season.phase,
+        }}
+        userEmail={user.email}
+      />
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
@@ -66,12 +81,8 @@ export default async function SchedulePage({ params }: SchedulePageProps) {
               fontFamily: 'var(--font-display)',
               color: 'var(--text-primary)'
             }}>
-              {season.year} Season Schedule
+              Schedule
             </h1>
-            <p style={{ color: 'var(--text-secondary)' }}>
-              {team.city} {team.name} • Week <span style={{ fontFamily: 'var(--font-mono)' }}>{season.current_week}</span> •{" "}
-              {season.phase}
-            </p>
           </div>
 
           {/* Quick Actions */}

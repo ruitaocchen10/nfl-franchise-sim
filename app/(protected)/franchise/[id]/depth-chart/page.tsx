@@ -5,7 +5,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import Navigation from "@/components/layout/Navigation";
+import FranchiseNavigation from "@/components/layout/FranchiseNavigation";
 import { getFranchiseById } from "@/app/actions/franchises";
 import { getDepthChart } from "@/app/actions/roster";
 import DepthChartView from "./DepthChartView";
@@ -28,13 +28,30 @@ export default async function DepthChartPage({ params }: DepthChartPageProps) {
 
   // Fetch franchise details
   const franchise = (await getFranchiseById(id)) as any;
+  const team = franchise.team as any;
+  const season = franchise.current_season as any;
 
   // Fetch depth chart
   const depthChart = await getDepthChart(id);
 
   return (
     <div className="min-h-screen bg-bg-darkest">
-      <Navigation userEmail={user.email} />
+      <FranchiseNavigation
+        franchiseId={id}
+        teamData={{
+          abbreviation: team.abbreviation,
+          city: team.city,
+          name: team.name,
+          primary_color: team.primary_color,
+          secondary_color: team.secondary_color,
+        }}
+        seasonData={{
+          year: season.year,
+          current_week: season.current_week,
+          phase: season.phase,
+        }}
+        userEmail={user.email}
+      />
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">

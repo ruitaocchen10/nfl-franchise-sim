@@ -6,7 +6,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import Navigation from "@/components/layout/Navigation";
+import FranchiseNavigation from "@/components/layout/FranchiseNavigation";
 import { getFranchiseById } from "@/app/actions/franchises";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
 
@@ -33,44 +33,36 @@ export default async function ManagePage({ params }: ManagePageProps) {
 
   return (
     <div className="min-h-screen bg-bg-darkest">
-      <Navigation userEmail={user.email} />
+      <FranchiseNavigation
+        franchiseId={id}
+        teamData={{
+          abbreviation: team.abbreviation,
+          city: team.city,
+          name: team.name,
+          primary_color: team.primary_color,
+          secondary_color: team.secondary_color,
+        }}
+        seasonData={{
+          year: season.year,
+          current_week: season.current_week,
+          phase: season.phase,
+        }}
+        userEmail={user.email}
+      />
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           {/* Header */}
           <div className="mb-6 slide-up">
-            <div className="flex items-center gap-4 mb-4">
-              <div
-                className="w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-2xl shadow-lg"
-                style={{
-                  backgroundColor: team.primary_color,
-                  fontFamily: 'var(--font-mono)',
-                  boxShadow: `0 4px 16px ${team.primary_color}40`
-                }}
-              >
-                {team.abbreviation}
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold uppercase tracking-wide" style={{
-                  fontFamily: 'var(--font-display)',
-                  color: 'var(--text-primary)'
-                }}>
-                  Franchise Management
-                </h1>
-                <p style={{ color: 'var(--text-secondary)' }}>
-                  {franchise.franchise_name} • {season.year} Season
-                </p>
-              </div>
-            </div>
-
-            {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-              <Link href={`/franchise/${id}`} className="hover:text-accent-cyan transition-colors">
-                Franchise Home
-              </Link>
-              <span>/</span>
-              <span style={{ color: 'var(--text-primary)' }}>Manage</span>
-            </div>
+            <h1 className="text-3xl font-bold uppercase tracking-wide" style={{
+              fontFamily: 'var(--font-display)',
+              color: 'var(--text-primary)'
+            }}>
+              Franchise Management
+            </h1>
+            <p style={{ color: 'var(--text-secondary)' }}>
+              {franchise.franchise_name}
+            </p>
           </div>
 
           {/* Management Tools Grid */}
@@ -222,19 +214,6 @@ export default async function ManagePage({ params }: ManagePageProps) {
             </Card>
           </div>
 
-          {/* Back Button */}
-          <div className="mt-8">
-            <Link
-              href={`/franchise/${id}`}
-              className="inline-flex items-center text-sm font-semibold hover:text-accent-cyan transition-colors"
-              style={{
-                color: 'var(--text-secondary)',
-                fontFamily: 'var(--font-display)'
-              }}
-            >
-              ← Back to Franchise Home
-            </Link>
-          </div>
         </div>
       </main>
     </div>
