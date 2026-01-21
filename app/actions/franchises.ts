@@ -72,15 +72,15 @@ export async function createFranchise(data: CreateFranchiseData) {
 
   console.log("✅ Found template season:", templateSeason.id);
 
-  // Create initial season (2024, week 0, preseason)
+  // Create initial season (2026, week 0, offseason)
   const { data: season, error: seasonError } = await supabase
     .from("seasons")
     .insert([
       {
         franchise_id: franchise.id,
-        year: 2024,
+        year: 2026,
         current_week: 0,
-        phase: "preseason",
+        phase: "offseason",
         is_template: false,
       },
     ] as Database["public"]["Tables"]["seasons"]["Insert"][])

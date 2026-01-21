@@ -1,0 +1,83 @@
+{
+  "total_contracts": 1000,
+  "contracts_by_team": [
+    {
+      "team": "IND",
+      "count": 68
+    },
+    {
+      "team": "DET",
+      "count": 65
+    },
+    {
+      "team": "ARI",
+      "count": 63
+    },
+    {
+      "team": "BUF",
+      "count": 62
+    },
+    {
+      "team": "DAL",
+      "count": 60
+    },
+    {
+      "team": "DEN",
+      "count": 60
+    },
+    {
+      "team": "CAR",
+      "count": 59
+    },
+    {
+      "team": "HOU",
+      "count": 59
+    },
+    {
+      "team": "CLE",
+      "count": 58
+    },
+    {
+      "team": "KC",
+      "count": 58
+    },
+    {
+      "team": "GB",
+      "count": 58
+    },
+    {
+      "team": "ATL",
+      "count": 56
+    },
+    {
+      "team": "BAL",
+      "count": 54
+    },
+    {
+      "team": "CIN",
+      "count": 54
+    },
+    {
+      "team": "CHI",
+      "count": 51
+    },
+    {
+      "team": "JAX",
+      "count": 51
+    },
+    {
+      "team": "LAR",
+      "count": 41
+    },
+    {
+      "team": "LV",
+      "count": 21
+    },
+    {
+      "team": "LAC",
+      "count": 2
+    }
+  ],
+  "teams_with_contracts": 19,
+  "average_per_team": "52.6"
+}

@@ -39,11 +39,8 @@ export default function FranchiseCard({ franchise }: FranchiseCardProps) {
                   {team.city} {team.name}
                 </p>
               </div>
-              <div className="flex-shrink-0">
-                <DeleteFranchiseButton
-                  franchiseId={franchise.id}
-                  franchiseName={franchise.franchise_name}
-                />
+              <div className="flex-shrink-0 w-9">
+                {/* Spacer for delete button */}
               </div>
             </div>
           </CardHeader>
@@ -77,6 +74,12 @@ export default function FranchiseCard({ franchise }: FranchiseCardProps) {
         </CardContent>
       </Card>
     </Link>
+      <div className="absolute top-4 right-4 z-10">
+        <DeleteFranchiseButton
+          franchiseId={franchise.id}
+          franchiseName={franchise.franchise_name}
+        />
+      </div>
     </div>
   );
 }

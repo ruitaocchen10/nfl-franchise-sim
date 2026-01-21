@@ -1,0 +1,8 @@
+{
+  "total_contracts": 2119,
+  "matched": 1891,
+  "unmatched": 228,
+  "match_rate": "89.2%",
+  "exact_matches": 1847,
+  "fuzzy_matches": 44
+}

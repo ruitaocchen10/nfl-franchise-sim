@@ -1,0 +1,134 @@
+{
+  "total_teams": 32,
+  "total_contracts": 2119,
+  "teams": {
+    "arizona-cardinals": {
+      "abbr": "ARI",
+      "contract_count": 78
+    },
+    "atlanta-falcons": {
+      "abbr": "ATL",
+      "contract_count": 67
+    },
+    "baltimore-ravens": {
+      "abbr": "BAL",
+      "contract_count": 63
+    },
+    "buffalo-bills": {
+      "abbr": "BUF",
+      "contract_count": 64
+    },
+    "carolina-panthers": {
+      "abbr": "CAR",
+      "contract_count": 63
+    },
+    "chicago-bears": {
+      "abbr": "CHI",
+      "contract_count": 63
+    },
+    "cincinnati-bengals": {
+      "abbr": "CIN",
+      "contract_count": 61
+    },
+    "cleveland-browns": {
+      "abbr": "CLE",
+      "contract_count": 69
+    },
+    "dallas-cowboys": {
+      "abbr": "DAL",
+      "contract_count": 63
+    },
+    "denver-broncos": {
+      "abbr": "DEN",
+      "contract_count": 65
+    },
+    "detroit-lions": {
+      "abbr": "DET",
+      "contract_count": 67
+    },
+    "green-bay-packers": {
+      "abbr": "GB",
+      "contract_count": 69
+    },
+    "houston-texans": {
+      "abbr": "HOU",
+      "contract_count": 65
+    },
+    "indianapolis-colts": {
+      "abbr": "IND",
+      "contract_count": 70
+    },
+    "jacksonville-jaguars": {
+      "abbr": "JAX",
+      "contract_count": 59
+    },
+    "kansas-city-chiefs": {
+      "abbr": "KC",
+      "contract_count": 73
+    },
+    "las-vegas-raiders": {
+      "abbr": "LV",
+      "contract_count": 61
+    },
+    "los-angeles-chargers": {
+      "abbr": "LAC",
+      "contract_count": 62
+    },
+    "los-angeles-rams": {
+      "abbr": "LAR",
+      "contract_count": 56
+    },
+    "miami-dolphins": {
+      "abbr": "MIA",
+      "contract_count": 74
+    },
+    "minnesota-vikings": {
+      "abbr": "MIN",
+      "contract_count": 63
+    },
+    "new-england-patriots": {
+      "abbr": "NE",
+      "contract_count": 68
+    },
+    "new-orleans-saints": {
+      "abbr": "NO",
+      "contract_count": 71
+    },
+    "new-york-giants": {
+      "abbr": "NYG",
+      "contract_count": 75
+    },
+    "new-york-jets": {
+      "abbr": "NYJ",
+      "contract_count": 75
+    },
+    "philadelphia-eagles": {
+      "abbr": "PHI",
+      "contract_count": 61
+    },
+    "pittsburgh-steelers": {
+      "abbr": "PIT",
+      "contract_count": 68
+    },
+    "san-francisco-49ers": {
+      "abbr": "SF",
+      "contract_count": 64
+    },
+    "seattle-seahawks": {
+      "abbr": "SEA",
+      "contract_count": 63
+    },
+    "tampa-bay-buccaneers": {
+      "abbr": "TB",
+      "contract_count": 62
+    },
+    "tennessee-titans": {
+      "abbr": "TEN",
+      "contract_count": 67
+    },
+    "washington-commanders": {
+      "abbr": "WAS",
+      "contract_count": 70
+    }
+  }
+}
