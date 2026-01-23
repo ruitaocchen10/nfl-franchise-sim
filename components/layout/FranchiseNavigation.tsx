@@ -9,6 +9,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/actions/auth";
 import { cn } from "@/lib/utils";
+import { formatSeasonDate, formatPhaseDisplay } from "@/lib/season/calendarUtils";
 
 interface FranchiseNavigationProps {
   franchiseId: string;
@@ -22,6 +23,7 @@ interface FranchiseNavigationProps {
   seasonData: {
     year: number;
     current_week: number;
+    simulation_date: string | null;
     phase: string;
   };
   userEmail?: string;
@@ -81,8 +83,10 @@ export default function FranchiseNavigation({
                     fontFamily: "var(--font-mono)",
                   }}
                 >
-                  {seasonData.year} • Week {seasonData.current_week} •{" "}
-                  {seasonData.phase}
+                  {seasonData.simulation_date
+                    ? formatSeasonDate(new Date(seasonData.simulation_date))
+                    : `${seasonData.year} Season`}{" "}
+                  • {formatPhaseDisplay(seasonData.phase as any)}
                 </p>
               </div>
             </div>

@@ -47,6 +47,7 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
         seasonData={{
           year: season.year,
           current_week: season.current_week,
+          simulation_date: season.simulation_date,
           phase: season.phase,
         }}
         userEmail={user.email}

@@ -48,6 +48,7 @@ export default async function DepthChartPage({ params }: DepthChartPageProps) {
         seasonData={{
           year: season.year,
           current_week: season.current_week,
+          simulation_date: season.simulation_date,
           phase: season.phase,
         }}
         userEmail={user.email}

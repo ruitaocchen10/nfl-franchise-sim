@@ -1,6 +1,7 @@
 /**
  * Game Simulation Server Actions
  * Handles simulating games, updating scores, stats, and standings
+ * Now includes calendar-based date progression
  */
 
 "use server";
@@ -8,6 +9,12 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { simulateGame } from "@/lib/simulation/gameEngine";
+import {
+  getWeekFromDate,
+  getPhaseFromDate,
+  hasTradeDeadlinePassed,
+  addDays,
+} from "@/lib/season/calendarUtils";
 import type { Database } from "@/lib/types/database.types";
 
 type Game = Database["public"]["Tables"]["games"]["Row"];
@@ -263,11 +270,38 @@ export async function simulateWeek(
     }
   }
 
-  // Update current week in season
-  await supabase
+  // Get season info to update dates
+  const { data: season } = await supabase
     .from("seasons")
-    .update({ current_week: week })
-    .eq("id", franchise.current_season_id!);
+    .select("year, simulation_date, season_start_date, trade_deadline_passed")
+    .eq("id", franchise.current_season_id!)
+    .single();
+
+  if (season) {
+    // Calculate new simulation_date (advance by 7 days after simulating the week)
+    const currentDate = season.simulation_date
+      ? new Date(season.simulation_date)
+      : new Date(season.season_start_date || new Date());
+    const newDate = addDays(currentDate, 7);
+
+    // Check if trade deadline passed during this week
+    const tradeDeadlinePassed =
+      season.trade_deadline_passed || hasTradeDeadlinePassed(newDate, season.year);
+
+    // Get new phase based on date
+    const newPhase = getPhaseFromDate(newDate, season.year);
+
+    // Update season with new date, week, phase, and trade deadline status
+    await supabase
+      .from("seasons")
+      .update({
+        current_week: week,
+        simulation_date: newDate.toISOString(),
+        phase: newPhase,
+        trade_deadline_passed: tradeDeadlinePassed,
+      })
+      .eq("id", franchise.current_season_id!);
+  }
 
   return { success: true, gamesSimulated: successCount };
 }

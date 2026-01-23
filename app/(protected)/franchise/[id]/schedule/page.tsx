@@ -1,17 +1,22 @@
 /**
  * Schedule Page
- * Displays the season schedule and allows game simulation
+ * Displays the season schedule with calendar dates and time slots
+ * Allows game simulation
  */
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getFranchiseById } from "@/app/actions/franchises";
 import { getSchedule } from "@/app/actions/simulation";
+import {
+  formatGameDate,
+  getTimeSlotBadge,
+  getTimeSlotDisplay,
+} from "@/lib/season/calendarUtils";
 import FranchiseNavigation from "@/components/layout/FranchiseNavigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
 import SimulateGameButton from "./SimulateGameButton";
 import SimulateWeekButton from "./SimulateWeekButton";
-import SimButton from "./SimButton";
 
 interface SchedulePageProps {
   params: Promise<{ id: string }>;
@@ -36,13 +41,20 @@ export default async function SchedulePage({ params }: SchedulePageProps) {
   const team = franchise.team as any;
   const season = franchise.current_season as any;
 
-  // Group games by week
+  // Group games by week and date
   const gamesByWeek = games.reduce(
     (acc: any, game: any) => {
-      if (!acc[game.week]) {
-        acc[game.week] = [];
+      const weekKey = game.game_type === "preseason"
+        ? `preseason-${game.week}`
+        : `week-${game.week}`;
+      if (!acc[weekKey]) {
+        acc[weekKey] = {
+          week: game.week,
+          type: game.game_type,
+          games: [],
+        };
       }
-      acc[game.week].push(game);
+      acc[weekKey].games.push(game);
       return acc;
     },
     {},
@@ -53,6 +65,36 @@ export default async function SchedulePage({ params }: SchedulePageProps) {
     (game: any) =>
       game.home_team.id === team.id || game.away_team.id === team.id,
   );
+
+  // Helper to get time slot priority for sorting
+  const getTimeSlotPriority = (slot: string | null): number => {
+    const priorities: Record<string, number> = {
+      tnf: 0,
+      thanksgiving: 0,
+      saturday: 1,
+      early_window: 2,
+      late_window: 3,
+      snf: 4,
+      mnf: 5,
+    };
+    return priorities[slot || "early_window"] ?? 2;
+  };
+
+  // Sort games by date and time slot
+  const sortGamesByDateTime = (a: any, b: any) => {
+    const dateA = a.game_date ? new Date(a.game_date).getTime() : 0;
+    const dateB = b.game_date ? new Date(b.game_date).getTime() : 0;
+    if (dateA !== dateB) return dateA - dateB;
+    return getTimeSlotPriority(a.game_time_slot) - getTimeSlotPriority(b.game_time_slot);
+  };
+
+  // Sort user's team games
+  userTeamGames.sort(sortGamesByDateTime);
+
+  // Sort games within each week
+  Object.values(gamesByWeek).forEach((weekData: any) => {
+    weekData.games.sort(sortGamesByDateTime);
+  });
 
   return (
     <div className="min-h-screen bg-bg-darkest">
@@ -68,6 +110,7 @@ export default async function SchedulePage({ params }: SchedulePageProps) {
         seasonData={{
           year: season.year,
           current_week: season.current_week,
+          simulation_date: season.simulation_date,
           phase: season.phase,
         }}
         userEmail={user.email}
@@ -107,6 +150,9 @@ export default async function SchedulePage({ params }: SchedulePageProps) {
                   userTeamGames.map((game: any) => {
                     const isHome = game.home_team.id === team.id;
                     const opponent = isHome ? game.away_team : game.home_team;
+                    const gameDate = game.game_date ? new Date(game.game_date) : null;
+                    const timeSlotBadge = getTimeSlotBadge(game.game_time_slot);
+                    const isPreseason = game.game_type === "preseason";
 
                     return (
                       <div
@@ -119,21 +165,40 @@ export default async function SchedulePage({ params }: SchedulePageProps) {
                         }}
                       >
                         <div className="flex items-center gap-4">
-                          <div className="w-16 text-center">
-                            <span className="text-sm font-semibold uppercase tracking-wider" style={{
+                          <div className="min-w-24 text-center">
+                            <div className="text-sm font-semibold uppercase tracking-wider" style={{
                               fontFamily: 'var(--font-display)',
                               color: 'var(--text-tertiary)'
                             }}>
-                              Week {game.week}
-                            </span>
+                              {isPreseason ? "Preseason" : `Week ${game.week}`}
+                            </div>
+                            {gameDate && (
+                              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                                {gameDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                              </div>
+                            )}
                           </div>
-                          <div>
-                            <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                              {isHome ? "vs" : "@"} {opponent.city}{" "}
-                              {opponent.name}
-                            </p>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                                {isHome ? "vs" : "@"} {opponent.city}{" "}
+                                {opponent.name}
+                              </p>
+                              {timeSlotBadge && (
+                                <span
+                                  className="px-2 py-0.5 text-xs font-bold rounded uppercase"
+                                  style={{
+                                    background: 'rgba(0, 217, 255, 0.15)',
+                                    color: '#00d9ff',
+                                    fontFamily: 'var(--font-display)'
+                                  }}
+                                >
+                                  {timeSlotBadge}
+                                </span>
+                              )}
+                            </div>
                             {game.simulated && (
-                              <p className="text-sm" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
+                              <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
                                 Final: {isHome ? game.home_score : game.away_score} -{" "}
                                 {isHome ? game.away_score : game.home_score}
                                 {game.overtime && " (OT)"}
@@ -182,64 +247,103 @@ export default async function SchedulePage({ params }: SchedulePageProps) {
             <CardContent>
               <div className="space-y-6">
                 {Object.keys(gamesByWeek)
-                  .sort((a, b) => Number(a) - Number(b))
-                  .map((week) => (
-                    <div key={week} className="border-b pb-4" style={{ borderColor: 'var(--border-default)' }}>
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-lg font-semibold uppercase tracking-wide" style={{
-                          fontFamily: 'var(--font-display)',
-                          color: 'var(--text-primary)'
-                        }}>
-                          Week {week}
-                        </h3>
-                        {!gamesByWeek[week].every((g: any) => g.simulated) && (
-                          <SimulateWeekButton
-                            franchiseId={id}
-                            week={Number(week)}
-                            variant="secondary"
-                          />
-                        )}
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {gamesByWeek[week].map((game: any) => (
-                          <div
-                            key={game.id}
-                            className="flex items-center justify-between p-3 rounded border text-sm"
-                            style={{
-                              background: 'var(--bg-light)',
-                              borderColor: 'var(--border-default)'
-                            }}
-                          >
-                            <div>
-                              <p style={{ color: 'var(--text-primary)' }}>
-                                <span className="font-semibold" style={{ fontFamily: 'var(--font-mono)' }}>
-                                  {game.away_team.abbreviation}
-                                </span>{" "}
-                                @{" "}
-                                <span className="font-semibold" style={{ fontFamily: 'var(--font-mono)' }}>
-                                  {game.home_team.abbreviation}
-                                </span>
+                  .sort((a, b) => {
+                    // Sort preseason first, then regular season
+                    if (a.startsWith("preseason") && !b.startsWith("preseason")) return -1;
+                    if (!a.startsWith("preseason") && b.startsWith("preseason")) return 1;
+                    return gamesByWeek[a].week - gamesByWeek[b].week;
+                  })
+                  .map((weekKey) => {
+                    const weekData = gamesByWeek[weekKey];
+                    const isPreseason = weekData.type === "preseason";
+                    const weekTitle = isPreseason
+                      ? `Preseason Week ${weekData.week}`
+                      : `Week ${weekData.week}`;
+
+                    // Get first game date for week display
+                    const firstGame = weekData.games[0];
+                    const weekDate = firstGame?.game_date
+                      ? formatGameDate(new Date(firstGame.game_date))
+                      : "";
+
+                    return (
+                      <div key={weekKey} className="border-b pb-4" style={{ borderColor: 'var(--border-default)' }}>
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h3 className="text-lg font-semibold uppercase tracking-wide" style={{
+                              fontFamily: 'var(--font-display)',
+                              color: 'var(--text-primary)'
+                            }}>
+                              {weekTitle}
+                            </h3>
+                            {weekDate && (
+                              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                                {weekDate}
                               </p>
-                              {game.simulated && (
-                                <p className="text-xs" style={{
-                                  color: 'var(--text-secondary)',
-                                  fontFamily: 'var(--font-mono)'
-                                }}>
-                                  {game.away_score} - {game.home_score}
-                                  {game.overtime && " (OT)"}
-                                </p>
-                              )}
-                            </div>
-                            {!game.simulated && (
-                              <SimButton onClick={() => {
-                                // This would need to be a client component action
-                              }} />
                             )}
                           </div>
-                        ))}
+                          {!weekData.games.every((g: any) => g.simulated) && !isPreseason && (
+                            <SimulateWeekButton
+                              franchiseId={id}
+                              week={weekData.week}
+                              variant="secondary"
+                            />
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {weekData.games.map((game: any) => {
+                            const timeSlotBadge = getTimeSlotBadge(game.game_time_slot);
+
+                            return (
+                              <div
+                                key={game.id}
+                                className="flex items-center justify-between p-3 rounded border text-sm"
+                                style={{
+                                  background: 'var(--bg-light)',
+                                  borderColor: 'var(--border-default)'
+                                }}
+                              >
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <p style={{ color: 'var(--text-primary)' }}>
+                                      <span className="font-semibold" style={{ fontFamily: 'var(--font-mono)' }}>
+                                        {game.away_team.abbreviation}
+                                      </span>{" "}
+                                      @{" "}
+                                      <span className="font-semibold" style={{ fontFamily: 'var(--font-mono)' }}>
+                                        {game.home_team.abbreviation}
+                                      </span>
+                                    </p>
+                                    {timeSlotBadge && (
+                                      <span
+                                        className="px-1.5 py-0.5 text-xs font-bold rounded uppercase"
+                                        style={{
+                                          background: 'rgba(0, 217, 255, 0.15)',
+                                          color: '#00d9ff',
+                                          fontFamily: 'var(--font-display)'
+                                        }}
+                                      >
+                                        {timeSlotBadge}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {game.simulated && (
+                                    <p className="text-xs mt-1" style={{
+                                      color: 'var(--text-secondary)',
+                                      fontFamily: 'var(--font-mono)'
+                                    }}>
+                                      {game.away_score} - {game.home_score}
+                                      {game.overtime && " (OT)"}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
               </div>
             </CardContent>
           </Card>

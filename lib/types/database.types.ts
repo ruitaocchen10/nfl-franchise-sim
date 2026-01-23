@@ -97,7 +97,10 @@ export interface Database {
           franchise_id: string | null
           year: number
           current_week: number
-          phase: 'preseason' | 'regular' | 'playoffs' | 'offseason' | 'draft' | 'free_agency'
+          simulation_date: string | null
+          season_start_date: string | null
+          trade_deadline_passed: boolean
+          phase: 'offseason' | 'free_agency' | 'draft' | 'training_camp' | 'preseason' | 'regular_season' | 'postseason'
           is_template: boolean
           created_at: string
           updated_at: string
@@ -107,7 +110,10 @@ export interface Database {
           franchise_id?: string | null
           year: number
           current_week?: number
-          phase?: 'preseason' | 'regular' | 'playoffs' | 'offseason' | 'draft' | 'free_agency'
+          simulation_date?: string | null
+          season_start_date?: string | null
+          trade_deadline_passed?: boolean
+          phase?: 'offseason' | 'free_agency' | 'draft' | 'training_camp' | 'preseason' | 'regular_season' | 'postseason'
           is_template?: boolean
           created_at?: string
           updated_at?: string
@@ -117,7 +123,10 @@ export interface Database {
           franchise_id?: string | null
           year?: number
           current_week?: number
-          phase?: 'preseason' | 'regular' | 'playoffs' | 'offseason' | 'draft' | 'free_agency'
+          simulation_date?: string | null
+          season_start_date?: string | null
+          trade_deadline_passed?: boolean
+          phase?: 'offseason' | 'free_agency' | 'draft' | 'training_camp' | 'preseason' | 'regular_season' | 'postseason'
           is_template?: boolean
           created_at?: string
           updated_at?: string
@@ -387,6 +396,8 @@ export interface Database {
           id: string
           season_id: string
           week: number
+          game_date: string | null
+          game_time_slot: 'early_window' | 'late_window' | 'snf' | 'mnf' | 'tnf' | 'saturday' | 'thanksgiving' | null
           game_type: 'preseason' | 'regular' | 'wildcard' | 'divisional' | 'conference' | 'superbowl'
           home_team_id: string
           away_team_id: string
@@ -403,6 +414,8 @@ export interface Database {
           id?: string
           season_id: string
           week: number
+          game_date?: string | null
+          game_time_slot?: 'early_window' | 'late_window' | 'snf' | 'mnf' | 'tnf' | 'saturday' | 'thanksgiving' | null
           game_type?: 'preseason' | 'regular' | 'wildcard' | 'divisional' | 'conference' | 'superbowl'
           home_team_id: string
           away_team_id: string
@@ -419,6 +432,8 @@ export interface Database {
           id?: string
           season_id?: string
           week?: number
+          game_date?: string | null
+          game_time_slot?: 'early_window' | 'late_window' | 'snf' | 'mnf' | 'tnf' | 'saturday' | 'thanksgiving' | null
           game_type?: 'preseason' | 'regular' | 'wildcard' | 'divisional' | 'conference' | 'superbowl'
           home_team_id?: string
           away_team_id?: string
@@ -769,6 +784,33 @@ export interface Database {
         }
         Relationships: []
       }
+      team_bye_weeks: {
+        Row: {
+          id: string
+          season_id: string
+          team_id: string
+          bye_week_number: number
+          bye_week_date: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          season_id: string
+          team_id: string
+          bye_week_number: number
+          bye_week_date: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          season_id?: string
+          team_id?: string
+          bye_week_number?: number
+          bye_week_date?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -780,10 +822,11 @@ export interface Database {
       difficulty_level: 'easy' | 'medium' | 'hard'
       conference: 'AFC' | 'NFC'
       division: 'East' | 'West' | 'North' | 'South'
-      season_phase: 'preseason' | 'regular' | 'playoffs' | 'offseason' | 'draft' | 'free_agency'
+      season_phase: 'offseason' | 'free_agency' | 'draft' | 'training_camp' | 'preseason' | 'regular_season' | 'postseason'
       player_status: 'active' | 'injured_reserve' | 'practice_squad' | 'inactive'
       development_trait: 'superstar' | 'star' | 'normal' | 'slow'
       game_type: 'preseason' | 'regular' | 'wildcard' | 'divisional' | 'conference' | 'superbowl'
+      game_time_slot: 'early_window' | 'late_window' | 'snf' | 'mnf' | 'tnf' | 'saturday' | 'thanksgiving'
       weather_type: 'clear' | 'rain' | 'snow' | 'wind' | 'dome'
       event_type: 'touchdown' | 'field_goal' | 'turnover' | 'injury' | 'big_play' | 'safety' | 'two_point' | 'game_winning'
     }
