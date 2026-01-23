@@ -33,23 +33,7 @@ export default async function ManagePage({ params }: ManagePageProps) {
 
   return (
     <div className="min-h-screen bg-bg-darkest">
-      <FranchiseNavigation
-        franchiseId={id}
-        teamData={{
-          abbreviation: team.abbreviation,
-          city: team.city,
-          name: team.name,
-          primary_color: team.primary_color,
-          secondary_color: team.secondary_color,
-        }}
-        seasonData={{
-          year: season.year,
-          current_week: season.current_week,
-          simulation_date: season.simulation_date,
-          phase: season.phase,
-        }}
-        userEmail={user.email}
-      />
+      <FranchiseNavigation franchiseId={id} />
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">

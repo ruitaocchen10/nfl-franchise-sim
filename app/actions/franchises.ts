@@ -469,14 +469,14 @@ export async function deleteFranchise(
     return { success: false, error: "Franchise not found" };
   }
 
-  // Soft delete: set is_active to false
-  const { error: updateError } = await supabase
+  // Hard delete: remove franchise and cascade delete all related data
+  const { error: deleteError } = await supabase
     .from("franchises")
-    .update({ is_active: false })
+    .delete()
     .eq("id", franchiseId);
 
-  if (updateError) {
-    console.error("Error deleting franchise:", updateError);
+  if (deleteError) {
+    console.error("Error deleting franchise:", deleteError);
     return { success: false, error: "Failed to delete franchise" };
   }
 

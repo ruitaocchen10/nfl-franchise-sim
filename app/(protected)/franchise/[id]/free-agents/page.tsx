@@ -1,20 +1,19 @@
 /**
- * Depth Chart Page
- * Displays and manages team depth chart with player reordering
+ * Free Agents Page
+ * Sign free agents and manage player contracts
  */
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import FranchiseNavigation from "@/components/layout/FranchiseNavigation";
 import { getFranchiseById } from "@/app/actions/franchises";
-import { getDepthChart } from "@/app/actions/roster";
-import DepthChartView from "./DepthChartView";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
 
-interface DepthChartPageProps {
+interface FreeAgentsPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function DepthChartPage({ params }: DepthChartPageProps) {
+export default async function FreeAgentsPage({ params }: FreeAgentsPageProps) {
   const supabase = await createClient();
   const { id } = await params;
 
@@ -28,11 +27,6 @@ export default async function DepthChartPage({ params }: DepthChartPageProps) {
 
   // Fetch franchise details
   const franchise = (await getFranchiseById(id)) as any;
-  const team = franchise.team as any;
-  const season = franchise.current_season as any;
-
-  // Fetch depth chart
-  const depthChart = await getDepthChart(id);
 
   return (
     <div className="min-h-screen bg-bg-darkest">
@@ -45,14 +39,32 @@ export default async function DepthChartPage({ params }: DepthChartPageProps) {
             <h1 className="text-3xl font-bold uppercase tracking-wide" style={{
               fontFamily: 'var(--font-display)',
               color: 'var(--text-primary)'
-            }}>Depth Chart</h1>
+            }}>
+              Free Agents
+            </h1>
             <p className="mt-2" style={{ color: 'var(--text-secondary)' }}>
-              Manage your team's starting lineup and backups
+              Sign free agents and manage player contracts
             </p>
           </div>
 
-          {/* Depth Chart Component */}
-          <DepthChartView depthChart={depthChart} franchiseId={id} />
+          {/* Coming Soon Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Coming Soon</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p style={{ color: 'var(--text-secondary)' }}>
+                The free agency feature is currently under development. You'll be able to:
+              </p>
+              <ul className="list-disc list-inside mt-4 space-y-2" style={{ color: 'var(--text-secondary)' }}>
+                <li>Browse available free agents</li>
+                <li>Filter by position, rating, and salary</li>
+                <li>Sign players to contracts</li>
+                <li>Manage salary cap space</li>
+                <li>View contract details and negotiations</li>
+              </ul>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>

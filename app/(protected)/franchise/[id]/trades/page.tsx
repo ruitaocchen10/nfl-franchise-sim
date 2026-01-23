@@ -1,20 +1,19 @@
 /**
- * Roster Page
- * Displays the team's 53-man roster with filtering and sorting
+ * Trades Page
+ * Negotiate trades with other teams
  */
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import FranchiseNavigation from "@/components/layout/FranchiseNavigation";
 import { getFranchiseById } from "@/app/actions/franchises";
-import { getFranchiseRoster } from "@/app/actions/roster";
-import RosterView from "./RosterView";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
 
-interface RosterPageProps {
+interface TradesPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function RosterPage({ params }: RosterPageProps) {
+export default async function TradesPage({ params }: TradesPageProps) {
   const supabase = await createClient();
   const { id } = await params;
 
@@ -28,11 +27,6 @@ export default async function RosterPage({ params }: RosterPageProps) {
 
   // Fetch franchise details
   const franchise = (await getFranchiseById(id)) as any;
-  const team = franchise.team as any;
-  const season = franchise.current_season as any;
-
-  // Fetch roster
-  const roster = await getFranchiseRoster(id);
 
   return (
     <div className="min-h-screen bg-bg-darkest">
@@ -46,15 +40,30 @@ export default async function RosterPage({ params }: RosterPageProps) {
               fontFamily: 'var(--font-display)',
               color: 'var(--text-primary)'
             }}>
-              Roster
+              Trades
             </h1>
-            <p style={{ color: 'var(--text-secondary)' }}>
-              <span style={{ fontFamily: 'var(--font-mono)' }}>{roster.length}</span> Players
+            <p className="mt-2" style={{ color: 'var(--text-secondary)' }}>
+              Negotiate trades with other teams
             </p>
           </div>
 
-          {/* Roster View Component */}
-          <RosterView roster={roster} franchiseId={id} />
+          {/* Coming Soon Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Coming Soon</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p style={{ color: 'var(--text-secondary)' }}>
+                The trades feature is currently under development. You'll be able to:
+              </p>
+              <ul className="list-disc list-inside mt-4 space-y-2" style={{ color: 'var(--text-secondary)' }}>
+                <li>Propose trades with other teams</li>
+                <li>View trade offers from AI teams</li>
+                <li>Negotiate player and draft pick swaps</li>
+                <li>Review trade history</li>
+              </ul>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>
