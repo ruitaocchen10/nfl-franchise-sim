@@ -193,23 +193,33 @@ export default function QuickStats({
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
       {stats.map((stat, index) => (
-        <Card key={index}>
+        <Card
+          key={index}
+          className="border-t-0"
+          style={{
+            backgroundImage: 'linear-gradient(135deg, var(--bg-medium) 0%, var(--bg-dark) 100%)',
+          }}
+        >
           <CardContent className="pt-6 pb-6">
             <div className="text-center">
               <p
-                className="text-xs uppercase tracking-wider font-semibold mb-2"
+                className="text-[10px] uppercase tracking-widest font-bold mb-3"
                 style={{
                   fontFamily: 'var(--font-display)',
-                  color: 'var(--text-tertiary)',
+                  color: 'var(--text-secondary)',
+                  opacity: 0.7,
                 }}
               >
                 {stat.label}
               </p>
               <p
-                className="text-3xl font-bold"
+                className="text-4xl font-extrabold tracking-tight leading-none"
                 style={{
                   fontFamily: 'var(--font-mono)',
-                  color: 'var(--text-primary)',
+                  color: stat.label === 'Wins' || stat.label === 'Overall Rating'
+                    ? 'var(--accent-cyan)'
+                    : 'var(--text-primary)',
+                  textShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
                 }}
               >
                 {stat.value}

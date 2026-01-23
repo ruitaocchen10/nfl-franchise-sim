@@ -33,7 +33,7 @@ export default function QuickActionButton({
   if (disabled) {
     return (
       <div
-        className="block w-full px-4 py-3 rounded-lg border text-left opacity-60 cursor-not-allowed"
+        className="block w-full px-4 py-3 rounded-none border text-left opacity-60 cursor-not-allowed"
         style={{
           background: 'var(--bg-light)',
           borderColor: 'var(--border-default)'
@@ -47,19 +47,24 @@ export default function QuickActionButton({
   return (
     <Link
       href={href}
-      className="block w-full px-4 py-3 rounded-lg border text-left transition-all hover:-translate-y-0.5"
+      className="block w-full px-4 py-3 rounded-none border border-l-2 text-left transition-all duration-300 ease-out hover:scale-[1.01] hover:border-l-accent-cyan"
       style={{
         background: 'var(--bg-medium)',
         borderColor: 'var(--border-default)',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+        borderLeftColor: 'var(--border-default)',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = 'var(--accent-cyan)';
-        e.currentTarget.style.boxShadow = '0 0 15px rgba(0, 217, 255, 0.2)';
+        e.currentTarget.style.borderLeftColor = 'var(--accent-cyan)';
+        e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 217, 255, 0.15)';
+        e.currentTarget.style.background = 'var(--bg-light)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = 'var(--border-default)';
+        e.currentTarget.style.borderLeftColor = 'var(--border-default)';
         e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+        e.currentTarget.style.background = 'var(--bg-medium)';
       }}
     >
       {content}

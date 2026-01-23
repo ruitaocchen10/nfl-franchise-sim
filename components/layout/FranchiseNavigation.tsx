@@ -37,7 +37,7 @@ export default function FranchiseNavigation({
     { name: "Trades", href: `/franchise/${franchiseId}/trades`, isLink: true, hasDropdown: false },
     { name: "Free Agents", href: `/franchise/${franchiseId}/free-agents`, isLink: true, hasDropdown: false },
     { name: "Prospects", href: `/franchise/${franchiseId}/prospects`, isLink: true, hasDropdown: false },
-    { name: "Sign Out", href: "", isLink: false, hasDropdown: false, isAction: true },
+    { name: "Back to Dashboard", href: "/dashboard", isLink: true, hasDropdown: false },
   ];
 
   return (
@@ -79,10 +79,10 @@ export default function FranchiseNavigation({
               >
                 <button
                   className={cn(
-                    "w-full h-16 flex items-center justify-center text-sm font-medium uppercase tracking-wider transition-all border-r border-border-default",
+                    "w-full h-16 flex items-center justify-center text-sm font-semibold uppercase tracking-wider transition-all duration-200 border-r border-border-default",
                     isTeamActive
-                      ? "text-accent-cyan"
-                      : "text-text-secondary hover:bg-bg-medium hover:text-text-primary"
+                      ? "text-accent-cyan bg-bg-darkest border-b-[3px] border-b-accent-cyan"
+                      : "text-text-secondary hover:bg-bg-light hover:text-text-primary hover:border-b-2 hover:border-b-white/20"
                   )}
                   style={{
                     fontFamily: "var(--font-display)",
@@ -94,7 +94,7 @@ export default function FranchiseNavigation({
                 {/* Dropdown menu */}
                 {teamDropdownOpen && (
                   <div
-                    className="absolute top-full left-0 w-48 bg-bg-medium border border-border-default shadow-lg z-50"
+                    className="absolute top-full left-0 w-full bg-bg-medium border border-border-default shadow-lg z-50"
                     style={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.6)" }}
                   >
                     {item.dropdownItems?.map((subItem: any) => (
@@ -102,10 +102,10 @@ export default function FranchiseNavigation({
                         key={subItem.href}
                         href={subItem.href}
                         className={cn(
-                          "block px-4 py-3 text-sm font-medium uppercase tracking-wider transition-all border-b border-border-default last:border-b-0",
+                          "block px-4 py-3 text-sm font-semibold uppercase tracking-wider transition-all duration-200 border-b border-border-default last:border-b-0",
                           pathname === subItem.href
-                            ? "bg-bg-light text-accent-cyan"
-                            : "text-text-secondary hover:bg-bg-light hover:text-text-primary"
+                            ? "bg-bg-darkest text-accent-cyan border-l-[3px] border-l-accent-cyan"
+                            : "text-text-secondary hover:bg-bg-light hover:text-text-primary hover:border-l-2 hover:border-l-white/20"
                         )}
                         style={{
                           fontFamily: "var(--font-display)",
@@ -126,10 +126,10 @@ export default function FranchiseNavigation({
               key={item.href}
               href={item.href}
               className={cn(
-                "flex-1 h-16 flex items-center justify-center text-sm font-medium uppercase tracking-wider transition-all border-r border-border-default",
+                "flex-1 h-16 flex items-center justify-center text-sm font-semibold uppercase tracking-wider transition-all duration-200 border-r border-border-default",
                 isActive
-                  ? "text-accent-cyan"
-                  : "text-text-secondary hover:bg-bg-medium hover:text-text-primary"
+                  ? "text-accent-cyan bg-bg-darkest border-b-[3px] border-b-accent-cyan"
+                  : "text-text-secondary hover:bg-bg-light hover:text-text-primary hover:border-b-2 hover:border-b-white/20"
               )}
               style={{
                 fontFamily: "var(--font-display)",

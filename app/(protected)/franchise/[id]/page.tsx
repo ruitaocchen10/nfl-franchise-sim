@@ -36,12 +36,21 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
     redirect("/login");
   }
 
-  // Fetch franchise details
+  // Fetch franchise details with season info
   const franchise = (await getFranchiseById(id)) as any;
 
   // Type guard for team and season
   const team = franchise.team as any;
   const season = franchise.current_season as any;
+
+  // Extract season data for UpcomingEvent
+  const seasonData = {
+    phase: season.phase,
+    simulationDate: season.simulation_date,
+    currentWeek: season.current_week,
+    year: season.year,
+    tradeDeadlinePassed: season.trade_deadline_passed,
+  };
 
   // Fetch additional data
   const [standings, nextGame, overallRating, rosterSize] = await Promise.all([
@@ -64,11 +73,13 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
           <div className="mb-6 slide-up">
             <div className="flex items-center gap-4 mb-2">
               <div
-                className="w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-2xl shadow-lg"
+                className="w-16 h-16 rounded-none flex items-center justify-center text-white font-bold text-2xl border-2"
                 style={{
                   backgroundColor: team.primary_color,
                   fontFamily: "var(--font-mono)",
-                  boxShadow: `0 4px 16px ${team.primary_color}40`,
+                  boxShadow: `0 2px 8px ${team.primary_color}40, inset 0 -2px 4px rgba(0,0,0,0.3)`,
+                  borderColor: `${team.primary_color}`,
+                  filter: 'brightness(1.1)',
                 }}
               >
                 {team.abbreviation}
@@ -108,7 +119,11 @@ export default async function FranchisePage({ params }: FranchisePageProps) {
               <UpcomingEvent
                 upcomingGame={nextGame}
                 franchiseId={id}
-                phase={season.phase}
+                phase={seasonData.phase}
+                simulationDate={seasonData.simulationDate}
+                currentWeek={seasonData.currentWeek}
+                year={seasonData.year}
+                tradeDeadlinePassed={seasonData.tradeDeadlinePassed}
               />
 
               {/* Phase Info */}

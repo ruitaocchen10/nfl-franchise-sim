@@ -488,3 +488,178 @@ export async function getSchedule(franchiseId: string) {
 
   return games || [];
 }
+
+/**
+ * Advance simulation to next week (7 days forward)
+ */
+export async function advanceToNextWeek(
+  franchiseId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+
+  // Verify user owns this franchise
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const { data: franchise, error: franchiseError } = await supabase
+    .from("franchises")
+    .select("id, current_season_id")
+    .eq("id", franchiseId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (franchiseError || !franchise) {
+    return { success: false, error: "Franchise not found" };
+  }
+
+  // Get current season data
+  const { data: season, error: seasonError } = await supabase
+    .from("seasons")
+    .select("year, simulation_date, season_start_date, trade_deadline_passed")
+    .eq("id", franchise.current_season_id!)
+    .single();
+
+  if (seasonError || !season) {
+    return { success: false, error: "Season not found" };
+  }
+
+  // Calculate new date (advance by 7 days)
+  const currentDate = season.simulation_date
+    ? new Date(season.simulation_date)
+    : new Date(season.season_start_date || new Date());
+  const newDate = addDays(currentDate, 7);
+
+  // Check if trade deadline passed
+  const tradeDeadlinePassed =
+    season.trade_deadline_passed || hasTradeDeadlinePassed(newDate, season.year);
+
+  // Get new phase based on date
+  const newPhase = getPhaseFromDate(newDate, season.year);
+  const newWeek = getWeekFromDate(newDate, season.year);
+
+  // Update season
+  const { error: updateError } = await supabase
+    .from("seasons")
+    .update({
+      simulation_date: newDate.toISOString(),
+      phase: newPhase,
+      current_week: newWeek,
+      trade_deadline_passed: tradeDeadlinePassed,
+    })
+    .eq("id", franchise.current_season_id!);
+
+  if (updateError) {
+    return { success: false, error: "Failed to update season" };
+  }
+
+  // Revalidate relevant pages
+  revalidatePath(`/franchise/${franchiseId}`);
+  revalidatePath(`/franchise/${franchiseId}/schedule`);
+
+  return { success: true };
+}
+
+/**
+ * Advance simulation to a specific phase
+ */
+export async function advanceToPhase(
+  franchiseId: string,
+  targetPhase: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+
+  // Verify user owns this franchise
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const { data: franchise, error: franchiseError } = await supabase
+    .from("franchises")
+    .select("id, current_season_id")
+    .eq("id", franchiseId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (franchiseError || !franchise) {
+    return { success: false, error: "Franchise not found" };
+  }
+
+  // Get current season data
+  const { data: season, error: seasonError } = await supabase
+    .from("seasons")
+    .select("year, simulation_date, season_start_date")
+    .eq("id", franchise.current_season_id!)
+    .single();
+
+  if (seasonError || !season) {
+    return { success: false, error: "Season not found" };
+  }
+
+  // Get season dates
+  const dates = require("@/lib/season/calendarUtils").getSeasonDates(season.year);
+
+  // Determine target date based on phase
+  let targetDate: Date;
+  switch (targetPhase) {
+    case "free_agency":
+      targetDate = dates.freeAgencyStart;
+      break;
+    case "draft":
+      targetDate = dates.draftStart;
+      break;
+    case "training_camp":
+      targetDate = dates.trainingCampStart;
+      break;
+    case "preseason":
+      targetDate = dates.preseasonWeek1;
+      break;
+    case "regular_season":
+      targetDate = dates.regularSeasonStart;
+      break;
+    case "trade_deadline":
+      targetDate = dates.tradeDeadline;
+      break;
+    case "postseason":
+      targetDate = dates.wildCardStart;
+      break;
+    case "offseason":
+      targetDate = dates.superBowl;
+      targetDate = addDays(targetDate, 3); // Few days after Super Bowl
+      break;
+    default:
+      return { success: false, error: "Invalid target phase" };
+  }
+
+  // Get new phase and week
+  const newPhase = getPhaseFromDate(targetDate, season.year);
+  const newWeek = getWeekFromDate(targetDate, season.year);
+  const tradeDeadlinePassed = hasTradeDeadlinePassed(targetDate, season.year);
+
+  // Update season
+  const { error: updateError } = await supabase
+    .from("seasons")
+    .update({
+      simulation_date: targetDate.toISOString(),
+      phase: newPhase,
+      current_week: newWeek,
+      trade_deadline_passed: tradeDeadlinePassed,
+    })
+    .eq("id", franchise.current_season_id!);
+
+  if (updateError) {
+    return { success: false, error: "Failed to update season" };
+  }
+
+  // Revalidate relevant pages
+  revalidatePath(`/franchise/${franchiseId}`);
+  revalidatePath(`/franchise/${franchiseId}/schedule`);
+
+  return { success: true };
+}

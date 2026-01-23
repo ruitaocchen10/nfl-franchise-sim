@@ -23,14 +23,14 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          'rounded-lg border transition-all',
+          'rounded-none border border-t-2 border-t-accent-cyan/20 border-l-4 border-l-accent-cyan/30 transition-all duration-300 hover:border-t-accent-cyan/40 hover:border-l-accent-cyan/50',
           paddingStyles[padding],
           className
         )}
         style={{
           background: 'var(--bg-medium)',
           borderColor: 'var(--border-default)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.4)',
           ...style
         }}
         {...props}
@@ -47,9 +47,13 @@ export const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEleme
   ({ className, style, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('pb-4 mb-4', className)}
+      className={cn('pb-5 mb-5', className)}
       style={{
-        borderBottom: '1px solid var(--border-default)',
+        borderBottom: '2px solid transparent',
+        backgroundImage: 'linear-gradient(90deg, var(--accent-cyan) 0%, transparent 100%)',
+        backgroundSize: '100% 2px',
+        backgroundPosition: 'bottom',
+        backgroundRepeat: 'no-repeat',
         ...style
       }}
       {...props}
@@ -63,10 +67,11 @@ export const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadi
   ({ className, style, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('text-2xl font-bold uppercase tracking-wide', className)}
+      className={cn('text-2xl font-extrabold uppercase tracking-wide', className)}
       style={{
         fontFamily: 'var(--font-display)',
         color: 'var(--text-primary)',
+        textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
         ...style
       }}
       {...props}
