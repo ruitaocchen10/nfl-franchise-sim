@@ -1,14 +1,14 @@
 /**
  * Roster Page
- * Displays the team's 53-man roster with filtering and sorting
+ * View and compare rosters from all teams in the league
  */
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import FranchiseNavigation from "@/components/layout/FranchiseNavigation";
-import { getFranchiseById } from "@/app/actions/franchises";
-import { getFranchiseRoster } from "@/app/actions/roster";
-import RosterView from "./RosterView";
+import { getFranchiseById, getAllTeams } from "@/app/actions/franchises";
+import { getLeagueRosters } from "@/app/actions/roster";
+import LeagueRostersView from "./LeagueRostersView";
 
 interface RosterPageProps {
   params: Promise<{ id: string }>;
@@ -31,8 +31,11 @@ export default async function RosterPage({ params }: RosterPageProps) {
   const team = franchise.team as any;
   const season = franchise.current_season as any;
 
-  // Fetch roster
-  const roster = await getFranchiseRoster(id);
+  // Fetch only user's team roster initially (lazy load others)
+  const initialRoster = await getLeagueRosters(id, team.id);
+
+  // Fetch all teams for the team selector
+  const allTeams = await getAllTeams();
 
   return (
     <div className="min-h-screen bg-bg-darkest">
@@ -42,19 +45,41 @@ export default async function RosterPage({ params }: RosterPageProps) {
         <div className="px-4 py-6 sm:px-0">
           {/* Header */}
           <div className="mb-6 slide-up">
-            <h1 className="text-3xl font-bold uppercase tracking-wide" style={{
-              fontFamily: 'var(--font-display)',
-              color: 'var(--text-primary)'
-            }}>
-              Roster
-            </h1>
-            <p style={{ color: 'var(--text-secondary)' }}>
-              <span style={{ fontFamily: 'var(--font-mono)' }}>{roster.length}</span> Players
-            </p>
+            <div className="flex items-center gap-4 mb-2">
+              <div
+                className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-lg"
+                style={{
+                  backgroundColor: team.primary_color,
+                  fontFamily: "var(--font-mono)",
+                  boxShadow: `0 4px 16px ${team.primary_color}40`,
+                }}
+              >
+                {team.abbreviation}
+              </div>
+              <div>
+                <h1
+                  className="text-3xl font-bold uppercase tracking-wide"
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    color: "var(--text-primary)",
+                  }}
+                >
+                  League Rosters
+                </h1>
+                <p style={{ color: "var(--text-secondary)" }}>
+                  {season.year} Season
+                </p>
+              </div>
+            </div>
           </div>
 
-          {/* Roster View Component */}
-          <RosterView roster={roster} franchiseId={id} />
+          {/* League Rosters View Component */}
+          <LeagueRostersView
+            initialRoster={initialRoster}
+            franchiseId={id}
+            allTeams={allTeams}
+            userTeamId={team.id}
+          />
         </div>
       </main>
     </div>

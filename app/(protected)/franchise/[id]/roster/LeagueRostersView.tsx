@@ -455,14 +455,14 @@ export default function LeagueRostersView({
       {/* Back Button */}
       <div className="mt-8">
         <Link
-          href={`/franchise/${franchiseId}/manage`}
+          href={`/franchise/${franchiseId}`}
           className="inline-flex items-center text-sm font-semibold hover:text-accent-cyan transition-colors"
           style={{
             color: 'var(--text-secondary)',
             fontFamily: 'var(--font-display)'
           }}
         >
-          ← Back to Manage
+          ← Back to Franchise
         </Link>
       </div>
     </div>

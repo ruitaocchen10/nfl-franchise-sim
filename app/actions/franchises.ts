@@ -485,3 +485,204 @@ export async function deleteFranchise(
 
   return { success: true };
 }
+
+/**
+ * Get team standings for a franchise's current season
+ */
+export async function getTeamStandings(franchiseId: string, teamId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return null;
+  }
+
+  // Get franchise to get current season
+  const { data: franchise } = await supabase
+    .from("franchises")
+    .select("current_season_id")
+    .eq("id", franchiseId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!franchise || !franchise.current_season_id) {
+    return null;
+  }
+
+  // Get standings
+  const { data: standings } = await supabase
+    .from("team_standings")
+    .select("*")
+    .eq("season_id", franchise.current_season_id)
+    .eq("team_id", teamId)
+    .single();
+
+  return standings;
+}
+
+/**
+ * Get the next upcoming game for a team
+ */
+export async function getNextGame(franchiseId: string, teamId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return null;
+  }
+
+  // Get franchise to get current season
+  const { data: franchise } = await supabase
+    .from("franchises")
+    .select("current_season_id")
+    .eq("id", franchiseId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!franchise || !franchise.current_season_id) {
+    return null;
+  }
+
+  // Get next unsimulated game
+  const { data: game } = await supabase
+    .from("games")
+    .select(`
+      id,
+      week,
+      home_team_id,
+      away_team_id
+    `)
+    .eq("season_id", franchise.current_season_id)
+    .eq("simulated", false)
+    .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
+    .order("week", { ascending: true })
+    .limit(1)
+    .single();
+
+  if (!game) {
+    return null;
+  }
+
+  // Fetch team details separately
+  const { data: homeTeam } = await supabase
+    .from("teams")
+    .select("id, city, name, abbreviation")
+    .eq("id", game.home_team_id)
+    .single();
+
+  const { data: awayTeam } = await supabase
+    .from("teams")
+    .select("id, city, name, abbreviation")
+    .eq("id", game.away_team_id)
+    .single();
+
+  if (!homeTeam || !awayTeam) {
+    return null;
+  }
+
+  // Return game with full team info
+  return {
+    id: game.id,
+    week: game.week,
+    home_team: homeTeam,
+    away_team: awayTeam,
+    is_home_game: game.home_team_id === teamId,
+  };
+}
+
+/**
+ * Calculate team overall rating based on roster
+ */
+export async function getTeamOverallRating(franchiseId: string, teamId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return 0;
+  }
+
+  // Get franchise to get current season
+  const { data: franchise } = await supabase
+    .from("franchises")
+    .select("current_season_id")
+    .eq("id", franchiseId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!franchise || !franchise.current_season_id) {
+    return 0;
+  }
+
+  // Get all player IDs on the roster
+  const { data: rosterSpots } = await supabase
+    .from("roster_spots")
+    .select("player_id")
+    .eq("season_id", franchise.current_season_id)
+    .eq("team_id", teamId)
+    .eq("status", "active");
+
+  if (!rosterSpots || rosterSpots.length === 0) {
+    return 0;
+  }
+
+  const playerIds = rosterSpots.map((spot) => spot.player_id);
+
+  // Get player attributes
+  const { data: attributes } = await supabase
+    .from("player_attributes")
+    .select("overall_rating")
+    .eq("season_id", franchise.current_season_id)
+    .in("player_id", playerIds);
+
+  if (!attributes || attributes.length === 0) {
+    return 0;
+  }
+
+  // Calculate average
+  const sum = attributes.reduce((acc, attr) => acc + attr.overall_rating, 0);
+  const average = Math.round(sum / attributes.length);
+
+  return average;
+}
+
+/**
+ * Get roster size for a team
+ */
+export async function getRosterSize(franchiseId: string, teamId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return 0;
+  }
+
+  // Get franchise to get current season
+  const { data: franchise } = await supabase
+    .from("franchises")
+    .select("current_season_id")
+    .eq("id", franchiseId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!franchise || !franchise.current_season_id) {
+    return 0;
+  }
+
+  // Count active roster spots
+  const { count } = await supabase
+    .from("roster_spots")
+    .select("*", { count: "exact", head: true })
+    .eq("season_id", franchise.current_season_id)
+    .eq("team_id", teamId)
+    .eq("status", "active");
+
+  return count || 0;
+}
