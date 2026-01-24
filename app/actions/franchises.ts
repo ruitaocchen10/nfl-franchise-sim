@@ -331,6 +331,44 @@ export async function createFranchise(data: CreateFranchiseData) {
 
   console.log("✅ Contracts copied");
 
+  // Step 4: Copy free_agents from template season
+  console.log("📋 Copying free agents from template...");
+
+  const { data: templateFreeAgents, error: freeAgentsError } = await supabase
+    .from("free_agents")
+    .select("*")
+    .eq("season_id", templateSeason.id);
+
+  if (freeAgentsError) {
+    console.error("Error fetching template free agents:", freeAgentsError);
+    throw new Error("Failed to fetch template free agents");
+  }
+
+  if (templateFreeAgents && templateFreeAgents.length > 0) {
+    const newFreeAgents = templateFreeAgents.map((fa) => ({
+      season_id: season.id,
+      player_id: fa.player_id,
+      previous_team_id: fa.previous_team_id,
+      previous_contract_value: fa.previous_contract_value,
+      market_value: fa.market_value,
+      status: fa.status,
+      interested_teams: fa.interested_teams || [],
+    }));
+
+    const { error: freeAgentsInsertError } = await supabase
+      .from("free_agents")
+      .insert(newFreeAgents);
+
+    if (freeAgentsInsertError) {
+      console.error("Error inserting free agents:", freeAgentsInsertError);
+      // Non-critical, continue anyway
+    } else {
+      console.log(`✅ Copied ${newFreeAgents.length} free agents`);
+    }
+  } else {
+    console.log("   No free agents in template to copy");
+  }
+
   // ============================================================================
   // GENERATE SCHEDULE
   // ============================================================================

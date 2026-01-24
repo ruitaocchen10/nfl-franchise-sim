@@ -16,6 +16,8 @@ interface FreeAgent {
   previous_contract_value: number;
   market_value: number;
   status: string;
+  signed_team_id: string | null;
+  signed_at: string | null;
   player: {
     id: string;
     first_name: string;
@@ -43,6 +45,11 @@ interface FreeAgent {
     city: string;
     name: string;
   };
+  signed_team: {
+    abbreviation: string;
+    city: string;
+    name: string;
+  } | null;
 }
 
 /**
@@ -73,18 +80,19 @@ export async function getFreeAgents(
     return { success: false, error: "Franchise not found" };
   }
 
-  // Build query for free agents
+  // Build query for free agents - get both available and recently signed
   let query = supabase
     .from("free_agents")
     .select(
       `
       *,
       player:players!free_agents_player_id_fkey(*),
-      previous_team:teams!free_agents_previous_team_id_fkey(abbreviation, city, name)
+      previous_team:teams!free_agents_previous_team_id_fkey(abbreviation, city, name),
+      signed_team:teams!free_agents_signed_team_id_fkey(abbreviation, city, name)
     `,
     )
     .eq("season_id", franchise.current_season_id!)
-    .eq("status", "available");
+    .in("status", ["available", "signed"]); // Show both available and recently signed agents
 
   const { data: freeAgents, error: freeAgentsError } = await query;
 

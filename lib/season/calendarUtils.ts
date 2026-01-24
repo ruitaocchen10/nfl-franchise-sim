@@ -308,3 +308,45 @@ export function formatPhaseDisplay(phase: SeasonPhase): string {
 
   return phaseNames[phase];
 }
+
+/**
+ * Get which week of free agency period we're in (1-6)
+ * Returns 0 if not in free agency phase
+ * @deprecated Use calculateOffseasonWeek for extended offseason market
+ */
+export function getFreeAgencyWeek(currentDate: Date, year: number): number {
+  const dates = getSeasonDates(year);
+
+  if (currentDate < dates.freeAgencyStart || currentDate >= dates.draftStart) {
+    return 0; // Not in free agency period
+  }
+
+  const daysSinceStart = Math.floor(
+    (currentDate.getTime() - dates.freeAgencyStart.getTime()) /
+      (1000 * 60 * 60 * 24),
+  );
+
+  return Math.min(Math.floor(daysSinceStart / 7) + 1, 6);
+}
+
+/**
+ * Calculate which week of the extended offseason market we're in (1-20+)
+ * Includes free agency, draft, and training camp periods
+ * Returns 0 if market is not active
+ */
+export function calculateOffseasonWeek(currentDate: Date, year: number): number {
+  const dates = getSeasonDates(year);
+
+  // Market is active from free agency start through preseason
+  if (currentDate < dates.freeAgencyStart || currentDate >= dates.preseasonWeek1) {
+    return 0; // Market not active
+  }
+
+  // Calculate weeks since free agency started
+  const daysSinceFA = Math.floor(
+    (currentDate.getTime() - dates.freeAgencyStart.getTime()) /
+      (1000 * 60 * 60 * 24),
+  );
+
+  return Math.min(Math.floor(daysSinceFA / 7) + 1, 20);
+}

@@ -1,0 +1,50 @@
+{
+  "total_free_agents": 186,
+  "free_agents_by_position": [
+    {
+      "position": "DL",
+      "count": 37
+    },
+    {
+      "position": "P",
+      "count": 32
+    },
+    {
+      "position": "S",
+      "count": 24
+    },
+    {
+      "position": "LB",
+      "count": 21
+    },
+    {
+      "position": "CB",
+      "count": 21
+    },
+    {
+      "position": "OL",
+      "count": 20
+    },
+    {
+      "position": "RB",
+      "count": 8
+    },
+    {
+      "position": "WR",
+      "count": 8
+    },
+    {
+      "position": "QB",
+      "count": 8
+    },
+    {
+      "position": "TE",
+      "count": 5
+    },
+    {
+      "position": "K",
+      "count": 2
+    }
+  ],
+  "positions_represented": 11
+}

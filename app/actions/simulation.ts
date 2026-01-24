@@ -14,8 +14,10 @@ import {
   getPhaseFromDate,
   hasTradeDeadlinePassed,
   addDays,
+  calculateOffseasonWeek,
 } from "@/lib/season/calendarUtils";
 import { processSeasonEnd, shouldProcessSeasonEnd } from "@/lib/season/seasonTransition";
+import { runWeeklyAIFreeAgency } from "@/lib/ai/freeAgencyAI";
 import type { Database } from "@/lib/types/database.types";
 
 type Game = Database["public"]["Tables"]["games"]["Row"];
@@ -563,7 +565,7 @@ export async function advanceToNextWeek(
 
     return {
       success: true,
-      message: `Season ended! ${transitionResult.stats?.playersRetired || 0} players retired, ${transitionResult.stats?.freeAgentsCreated || 0} became free agents, ${transitionResult.stats?.prospectsGenerated || 0} prospects generated for upcoming draft.`,
+      message: `Season ended! ${transitionResult.stats?.playersRetired || 0} players retired, ${transitionResult.stats?.freeAgentsCreated || 0} became free agents, ${transitionResult.stats?.prospectsGenerated || 0} prospects generated for upcoming draft. Free agency period will begin soon!`,
     };
   }
 
@@ -583,11 +585,36 @@ export async function advanceToNextWeek(
     return { success: false, error: "Failed to update season" };
   }
 
+  // Run AI free agency during active offseason market phases
+  // Free agents can sign during: free_agency, draft, and training_camp
+  let freeAgencyMessage = "";
+  const activeMarketPhases = ["free_agency", "draft", "training_camp"];
+
+  if (activeMarketPhases.includes(newPhase)) {
+    const offseasonWeek = calculateOffseasonWeek(newDate, season.year);
+    if (offseasonWeek > 0) {
+      const faResult = await runWeeklyAIFreeAgency(
+        supabase,
+        franchise.current_season_id!,
+        offseasonWeek,
+        "medium",
+      );
+
+      if (faResult.success && faResult.playersSigned > 0) {
+        freeAgencyMessage = ` ${faResult.message}`;
+      }
+    }
+  }
+
   // Revalidate relevant pages
   revalidatePath(`/franchise/${franchiseId}`);
   revalidatePath(`/franchise/${franchiseId}/schedule`);
+  revalidatePath(`/franchise/${franchiseId}/free-agents`);
 
-  return { success: true };
+  return {
+    success: true,
+    message: freeAgencyMessage || undefined,
+  };
 }
 
 /**
@@ -690,7 +717,7 @@ export async function advanceToPhase(
 
     return {
       success: true,
-      message: `Season ended! ${transitionResult.stats?.playersRetired || 0} players retired, ${transitionResult.stats?.freeAgentsCreated || 0} became free agents, ${transitionResult.stats?.prospectsGenerated || 0} prospects generated for upcoming draft.`,
+      message: `Season ended! ${transitionResult.stats?.playersRetired || 0} players retired, ${transitionResult.stats?.freeAgentsCreated || 0} became free agents, ${transitionResult.stats?.prospectsGenerated || 0} prospects generated for upcoming draft. Free agency period will begin soon!`,
     };
   }
 

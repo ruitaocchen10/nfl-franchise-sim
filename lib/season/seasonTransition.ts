@@ -188,6 +188,9 @@ export async function processSeasonEnd(
     // Step 8: Generate schedule (placeholder for now)
     // await generateSchedule(supabase, newSeasonId);
 
+    // Note: AI Free Agency will run gradually during the free_agency phase
+    // via advanceToNextWeek() - not as a batch process here
+
     // Step 9: Log the progression
     await supabase.from("season_progression_log").insert({
       franchise_id: franchiseId,
