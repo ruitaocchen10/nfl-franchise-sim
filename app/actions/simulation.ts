@@ -15,6 +15,7 @@ import {
   hasTradeDeadlinePassed,
   addDays,
 } from "@/lib/season/calendarUtils";
+import { processSeasonEnd, shouldProcessSeasonEnd } from "@/lib/season/seasonTransition";
 import type { Database } from "@/lib/types/database.types";
 
 type Game = Database["public"]["Tables"]["games"]["Row"];
@@ -519,13 +520,15 @@ export async function advanceToNextWeek(
   // Get current season data
   const { data: season, error: seasonError } = await supabase
     .from("seasons")
-    .select("year, simulation_date, season_start_date, trade_deadline_passed")
+    .select("year, simulation_date, season_start_date, trade_deadline_passed, phase")
     .eq("id", franchise.current_season_id!)
     .single();
 
   if (seasonError || !season) {
     return { success: false, error: "Season not found" };
   }
+
+  const currentPhase = season.phase;
 
   // Calculate new date (advance by 7 days)
   const currentDate = season.simulation_date
@@ -541,6 +544,30 @@ export async function advanceToNextWeek(
   const newPhase = getPhaseFromDate(newDate, season.year);
   const newWeek = getWeekFromDate(newDate, season.year);
 
+  // Check if we're transitioning to offseason (triggers season end processing)
+  if (shouldProcessSeasonEnd(currentPhase, newPhase)) {
+    console.log("Transitioning to offseason - processing season end...");
+    const transitionResult = await processSeasonEnd(franchiseId, franchise.current_season_id!);
+
+    if (!transitionResult.success) {
+      return {
+        success: false,
+        error: transitionResult.error || "Failed to process season end",
+      };
+    }
+
+    // Revalidate all pages after season transition
+    revalidatePath(`/franchise/${franchiseId}`);
+    revalidatePath(`/franchise/${franchiseId}/schedule`);
+    revalidatePath(`/franchise/${franchiseId}/roster`);
+
+    return {
+      success: true,
+      message: `Season ended! ${transitionResult.stats?.playersRetired || 0} players retired, ${transitionResult.stats?.freeAgentsCreated || 0} became free agents, ${transitionResult.stats?.prospectsGenerated || 0} prospects generated for upcoming draft.`,
+    };
+  }
+
+  // Normal week advancement (not transitioning to offseason)
   // Update season
   const { error: updateError } = await supabase
     .from("seasons")
@@ -594,13 +621,15 @@ export async function advanceToPhase(
   // Get current season data
   const { data: season, error: seasonError } = await supabase
     .from("seasons")
-    .select("year, simulation_date, season_start_date")
+    .select("year, simulation_date, season_start_date, phase")
     .eq("id", franchise.current_season_id!)
     .single();
 
   if (seasonError || !season) {
     return { success: false, error: "Season not found" };
   }
+
+  const currentPhase = season.phase;
 
   // Get season dates
   const dates = require("@/lib/season/calendarUtils").getSeasonDates(season.year);
@@ -642,6 +671,30 @@ export async function advanceToPhase(
   const newWeek = getWeekFromDate(targetDate, season.year);
   const tradeDeadlinePassed = hasTradeDeadlinePassed(targetDate, season.year);
 
+  // Check if we're transitioning to offseason (triggers season end processing)
+  if (shouldProcessSeasonEnd(currentPhase, newPhase)) {
+    console.log("Transitioning to offseason via advanceToPhase - processing season end...");
+    const transitionResult = await processSeasonEnd(franchiseId, franchise.current_season_id!);
+
+    if (!transitionResult.success) {
+      return {
+        success: false,
+        error: transitionResult.error || "Failed to process season end",
+      };
+    }
+
+    // Revalidate all pages after season transition
+    revalidatePath(`/franchise/${franchiseId}`);
+    revalidatePath(`/franchise/${franchiseId}/schedule`);
+    revalidatePath(`/franchise/${franchiseId}/roster`);
+
+    return {
+      success: true,
+      message: `Season ended! ${transitionResult.stats?.playersRetired || 0} players retired, ${transitionResult.stats?.freeAgentsCreated || 0} became free agents, ${transitionResult.stats?.prospectsGenerated || 0} prospects generated for upcoming draft.`,
+    };
+  }
+
+  // Normal phase advancement (not transitioning to offseason)
   // Update season
   const { error: updateError } = await supabase
     .from("seasons")
