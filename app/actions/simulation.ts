@@ -14,10 +14,10 @@ import {
   getPhaseFromDate,
   hasTradeDeadlinePassed,
   addDays,
-  calculateOffseasonWeek,
 } from "@/lib/season/calendarUtils";
 import { processSeasonEnd, shouldProcessSeasonEnd } from "@/lib/season/seasonTransition";
-import { runWeeklyAIFreeAgency } from "@/lib/ai/freeAgencyAI";
+import { processPlayerDecisions, executeAISignings } from "@/lib/ai/freeAgencyAI";
+import { AITeamAgent } from "@/lib/ai/teamAgent";
 import type { Database } from "@/lib/types/database.types";
 
 type Game = Database["public"]["Tables"]["games"]["Row"];
@@ -25,6 +25,22 @@ type PlayerAttributes =
   Database["public"]["Tables"]["player_attributes"]["Row"];
 type RosterSpot = Database["public"]["Tables"]["roster_spots"]["Row"];
 type Team = Database["public"]["Tables"]["teams"]["Row"];
+
+/**
+ * Event types that can occur during day-by-day simulation
+ */
+enum SimulationEventType {
+  GAME = "GAME",
+  AI_FREE_AGENCY = "AI_FREE_AGENCY",
+  PHASE_TRANSITION = "PHASE_TRANSITION",
+  SEASON_END = "SEASON_END",
+}
+
+interface SimulationEvent {
+  type: SimulationEventType;
+  date: Date;
+  metadata?: any;
+}
 
 interface SimulationResult {
   success: boolean;
@@ -222,11 +238,12 @@ export async function simulateSingleGame(
 
 /**
  * Simulate all games in a week
+ * Now uses day-by-day simulation internally
  */
 export async function simulateWeek(
   franchiseId: string,
   week: number,
-): Promise<{ success: boolean; error?: string; gamesSimulated?: number }> {
+): Promise<{ success: boolean; error?: string; gamesSimulated?: number; messages?: string[] }> {
   const supabase = await createClient();
 
   // Verify user owns this franchise
@@ -248,65 +265,52 @@ export async function simulateWeek(
     return { success: false, error: "Franchise not found" };
   }
 
-  // Get all unsimulated games for this week
-  const { data: games, error: gamesError } = await supabase
+  // Get season info
+  const { data: season, error: seasonError } = await supabase
+    .from("seasons")
+    .select("year, simulation_date, season_start_date, phase")
+    .eq("id", franchise.current_season_id!)
+    .single();
+
+  if (seasonError || !season) {
+    return { success: false, error: "Season not found" };
+  }
+
+  // Count unsimulated games in this week before simulation
+  const { data: gamesBefore } = await supabase
     .from("games")
     .select("id")
     .eq("season_id", franchise.current_season_id!)
     .eq("week", week)
     .eq("simulated", false);
 
-  if (gamesError) {
-    return { success: false, error: "Failed to load games" };
-  }
-
-  if (!games || games.length === 0) {
+  if (!gamesBefore || gamesBefore.length === 0) {
     return { success: false, error: "No games to simulate this week" };
   }
 
-  // Simulate each game
-  let successCount = 0;
-  for (const game of games) {
-    const result = await simulateSingleGame(franchiseId, game.id);
-    if (result.success) {
-      successCount++;
-    }
+  // Use day-by-day simulation for 7 days
+  // This will automatically simulate games on their scheduled dates
+  const result = await advanceByDays(franchiseId, 7);
+
+  if (!result.success) {
+    return { success: false, error: result.error };
   }
 
-  // Get season info to update dates
-  const { data: season } = await supabase
-    .from("seasons")
-    .select("year, simulation_date, season_start_date, trade_deadline_passed")
-    .eq("id", franchise.current_season_id!)
-    .single();
+  // Count how many games were actually simulated
+  const { data: gamesAfter } = await supabase
+    .from("games")
+    .select("id")
+    .eq("season_id", franchise.current_season_id!)
+    .eq("week", week)
+    .eq("simulated", false);
 
-  if (season) {
-    // Calculate new simulation_date (advance by 7 days after simulating the week)
-    const currentDate = season.simulation_date
-      ? new Date(season.simulation_date)
-      : new Date(season.season_start_date || new Date());
-    const newDate = addDays(currentDate, 7);
+  const gamesSimulated = gamesBefore.length - (gamesAfter?.length || 0);
 
-    // Check if trade deadline passed during this week
-    const tradeDeadlinePassed =
-      season.trade_deadline_passed || hasTradeDeadlinePassed(newDate, season.year);
-
-    // Get new phase based on date
-    const newPhase = getPhaseFromDate(newDate, season.year);
-
-    // Update season with new date, week, phase, and trade deadline status
-    await supabase
-      .from("seasons")
-      .update({
-        current_week: week,
-        simulation_date: newDate.toISOString(),
-        phase: newPhase,
-        trade_deadline_passed: tradeDeadlinePassed,
-      })
-      .eq("id", franchise.current_season_id!);
-  }
-
-  return { success: true, gamesSimulated: successCount };
+  return {
+    success: true,
+    gamesSimulated,
+    messages: result.messages,
+  };
 }
 
 /**
@@ -454,6 +458,303 @@ async function updateSeasonStats(
 }
 
 /**
+ * Detect what events should occur on a specific date
+ * Returns array of events to be processed for that day
+ */
+async function getEventsForDate(
+  supabase: any,
+  currentDate: Date,
+  seasonId: string,
+  currentPhase: string,
+  year: number,
+): Promise<SimulationEvent[]> {
+  const events: SimulationEvent[] = [];
+
+  // Normalize date to start of day for comparison
+  const dateStr = currentDate.toISOString().split("T")[0];
+
+  // 1. Check for games scheduled on this date
+  const { data: gamesOnDate } = await supabase
+    .from("games")
+    .select("id, game_date")
+    .eq("season_id", seasonId)
+    .gte("game_date", dateStr)
+    .lt("game_date", new Date(new Date(dateStr).getTime() + 24 * 60 * 60 * 1000).toISOString())
+    .eq("simulated", false);
+
+  if (gamesOnDate && gamesOnDate.length > 0) {
+    events.push({
+      type: SimulationEventType.GAME,
+      date: currentDate,
+      metadata: { gameIds: gamesOnDate.map((g: any) => g.id) },
+    });
+  }
+
+  // 2. Check for phase transition
+  const newPhase = getPhaseFromDate(currentDate, year);
+  if (newPhase !== currentPhase) {
+    // Check if transitioning to offseason (triggers season end)
+    if (shouldProcessSeasonEnd(currentPhase, newPhase)) {
+      events.push({
+        type: SimulationEventType.SEASON_END,
+        date: currentDate,
+        metadata: { fromPhase: currentPhase, toPhase: newPhase },
+      });
+    } else {
+      events.push({
+        type: SimulationEventType.PHASE_TRANSITION,
+        date: currentDate,
+        metadata: { fromPhase: currentPhase, toPhase: newPhase },
+      });
+    }
+  }
+
+  // 3. Check for AI free agency activity
+  // Active during free_agency, draft, and training_camp phases
+  // Teams decide independently whether to be active each day
+  const activeMarketPhases = ["free_agency", "draft", "training_camp"];
+  if (activeMarketPhases.includes(newPhase)) {
+    events.push({
+      type: SimulationEventType.AI_FREE_AGENCY,
+      date: currentDate,
+      metadata: { phase: newPhase },
+    });
+  }
+
+  return events;
+}
+
+/**
+ * Process a single simulation event
+ */
+async function processEvent(
+  supabase: any,
+  event: SimulationEvent,
+  franchiseId: string,
+  seasonId: string,
+): Promise<{ success: boolean; error?: string; message?: string }> {
+  try {
+    switch (event.type) {
+      case SimulationEventType.GAME:
+        // Simulate all games scheduled for this day
+        const gameIds = event.metadata?.gameIds || [];
+        let gamesSimulated = 0;
+
+        for (const gameId of gameIds) {
+          const result = await simulateSingleGame(franchiseId, gameId);
+          if (result.success) {
+            gamesSimulated++;
+          }
+        }
+
+        return {
+          success: true,
+          message: gamesSimulated > 0 ? `Simulated ${gamesSimulated} game(s)` : undefined,
+        };
+
+      case SimulationEventType.AI_FREE_AGENCY:
+        // Use team agents for autonomous decision-making
+        const { data: teams } = await supabase.from("teams").select("id");
+
+        if (!teams) {
+          return { success: true };
+        }
+
+        const allOffers: any[] = [];
+
+        // Each team makes independent decisions
+        for (const team of teams) {
+          const agent = await AITeamAgent.load(supabase, team.id, seasonId);
+
+          if (!agent) {
+            console.warn(`No AI personality found for team ${team.id}`);
+            continue;
+          }
+
+          const result = await agent.processDay(event.date, event.metadata?.phase || "free_agency");
+
+          if (result.success && result.offers.length > 0) {
+            allOffers.push(...result.offers);
+          }
+        }
+
+        // Process player decisions and execute signings (existing logic)
+        if (allOffers.length > 0) {
+          const decisions = await processPlayerDecisions(supabase, allOffers, seasonId);
+          const signingResults = await executeAISignings(supabase, decisions, seasonId);
+
+          return {
+            success: true,
+            message: signingResults.signed > 0
+              ? `${signingResults.signed} player(s) signed`
+              : undefined,
+          };
+        }
+
+        return { success: true };
+
+      case SimulationEventType.PHASE_TRANSITION:
+        // Phase transition is handled in advanceByDays by updating the season record
+        // No additional processing needed here
+        return {
+          success: true,
+          message: `Entered ${event.metadata?.toPhase} phase`,
+        };
+
+      case SimulationEventType.SEASON_END:
+        // Process season end transition
+        const transitionResult = await processSeasonEnd(franchiseId, seasonId);
+
+        if (!transitionResult.success) {
+          return {
+            success: false,
+            error: transitionResult.error || "Failed to process season end",
+          };
+        }
+
+        return {
+          success: true,
+          message: `Season ended! ${transitionResult.stats?.playersRetired || 0} players retired, ${transitionResult.stats?.freeAgentsCreated || 0} became free agents.`,
+        };
+
+      default:
+        return { success: true };
+    }
+  } catch (error) {
+    console.error(`Error processing event ${event.type}:`, error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+/**
+ * Advance simulation by a specific number of days
+ * This is the core day-by-day simulation engine
+ */
+export async function advanceByDays(
+  franchiseId: string,
+  numDays: number,
+): Promise<{ success: boolean; error?: string; messages?: string[] }> {
+  const supabase = await createClient();
+
+  // Verify user owns this franchise
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const { data: franchise, error: franchiseError } = await supabase
+    .from("franchises")
+    .select("id, current_season_id")
+    .eq("id", franchiseId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (franchiseError || !franchise) {
+    return { success: false, error: "Franchise not found" };
+  }
+
+  // Get current season data
+  const { data: season, error: seasonError } = await supabase
+    .from("seasons")
+    .select("year, simulation_date, season_start_date, trade_deadline_passed, phase")
+    .eq("id", franchise.current_season_id!)
+    .single();
+
+  if (seasonError || !season) {
+    return { success: false, error: "Season not found" };
+  }
+
+  // Track messages from events
+  const messages: string[] = [];
+  let currentDate = season.simulation_date
+    ? new Date(season.simulation_date)
+    : new Date(season.season_start_date || new Date());
+  let currentPhase = season.phase;
+  let seasonEnded = false;
+
+  // Process each day sequentially
+  for (let day = 0; day < numDays; day++) {
+    // Advance to next day
+    currentDate = addDays(currentDate, 1);
+
+    // Detect events for this date
+    const events = await getEventsForDate(
+      supabase,
+      currentDate,
+      franchise.current_season_id!,
+      currentPhase,
+      season.year,
+    );
+
+    // Process each event
+    for (const event of events) {
+      const result = await processEvent(
+        supabase,
+        event,
+        franchiseId,
+        franchise.current_season_id!,
+      );
+
+      if (!result.success) {
+        return { success: false, error: result.error };
+      }
+
+      if (result.message) {
+        messages.push(result.message);
+      }
+
+      // Check if season ended
+      if (event.type === SimulationEventType.SEASON_END) {
+        seasonEnded = true;
+        break; // Stop processing days if season ended
+      }
+
+      // Update current phase if transition occurred
+      if (event.type === SimulationEventType.PHASE_TRANSITION) {
+        currentPhase = event.metadata?.toPhase || currentPhase;
+      }
+    }
+
+    // If season ended, stop the day loop
+    if (seasonEnded) {
+      break;
+    }
+
+    // Update season record for this day
+    const newWeek = getWeekFromDate(currentDate, season.year);
+    const newPhase = getPhaseFromDate(currentDate, season.year);
+    const tradeDeadlinePassed =
+      season.trade_deadline_passed || hasTradeDeadlinePassed(currentDate, season.year);
+
+    await supabase
+      .from("seasons")
+      .update({
+        simulation_date: currentDate.toISOString(),
+        current_week: newWeek,
+        phase: newPhase,
+        trade_deadline_passed: tradeDeadlinePassed,
+      })
+      .eq("id", franchise.current_season_id!);
+  }
+
+  // Revalidate relevant pages
+  revalidatePath(`/franchise/${franchiseId}`);
+  revalidatePath(`/franchise/${franchiseId}/schedule`);
+  revalidatePath(`/franchise/${franchiseId}/roster`);
+  revalidatePath(`/franchise/${franchiseId}/free-agents`);
+
+  return {
+    success: true,
+    messages: messages.length > 0 ? messages : undefined,
+  };
+}
+
+/**
  * Get schedule for a franchise's current season
  */
 export async function getSchedule(franchiseId: string) {
@@ -494,136 +795,37 @@ export async function getSchedule(franchiseId: string) {
 
 /**
  * Advance simulation to next week (7 days forward)
+ * Now uses day-by-day simulation internally
  */
 export async function advanceToNextWeek(
   franchiseId: string,
-): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient();
+): Promise<{ success: boolean; error?: string; message?: string }> {
+  // Simply delegate to advanceByDays with 7 days
+  const result = await advanceByDays(franchiseId, 7);
 
-  // Verify user owns this franchise
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return { success: false, error: "Not authenticated" };
+  if (!result.success) {
+    return { success: false, error: result.error };
   }
 
-  const { data: franchise, error: franchiseError } = await supabase
-    .from("franchises")
-    .select("id, current_season_id")
-    .eq("id", franchiseId)
-    .eq("user_id", user.id)
-    .single();
-
-  if (franchiseError || !franchise) {
-    return { success: false, error: "Franchise not found" };
-  }
-
-  // Get current season data
-  const { data: season, error: seasonError } = await supabase
-    .from("seasons")
-    .select("year, simulation_date, season_start_date, trade_deadline_passed, phase")
-    .eq("id", franchise.current_season_id!)
-    .single();
-
-  if (seasonError || !season) {
-    return { success: false, error: "Season not found" };
-  }
-
-  const currentPhase = season.phase;
-
-  // Calculate new date (advance by 7 days)
-  const currentDate = season.simulation_date
-    ? new Date(season.simulation_date)
-    : new Date(season.season_start_date || new Date());
-  const newDate = addDays(currentDate, 7);
-
-  // Check if trade deadline passed
-  const tradeDeadlinePassed =
-    season.trade_deadline_passed || hasTradeDeadlinePassed(newDate, season.year);
-
-  // Get new phase based on date
-  const newPhase = getPhaseFromDate(newDate, season.year);
-  const newWeek = getWeekFromDate(newDate, season.year);
-
-  // Check if we're transitioning to offseason (triggers season end processing)
-  if (shouldProcessSeasonEnd(currentPhase, newPhase)) {
-    console.log("Transitioning to offseason - processing season end...");
-    const transitionResult = await processSeasonEnd(franchiseId, franchise.current_season_id!);
-
-    if (!transitionResult.success) {
-      return {
-        success: false,
-        error: transitionResult.error || "Failed to process season end",
-      };
-    }
-
-    // Revalidate all pages after season transition
-    revalidatePath(`/franchise/${franchiseId}`);
-    revalidatePath(`/franchise/${franchiseId}/schedule`);
-    revalidatePath(`/franchise/${franchiseId}/roster`);
-
-    return {
-      success: true,
-      message: `Season ended! ${transitionResult.stats?.playersRetired || 0} players retired, ${transitionResult.stats?.freeAgentsCreated || 0} became free agents, ${transitionResult.stats?.prospectsGenerated || 0} prospects generated for upcoming draft. Free agency period will begin soon!`,
-    };
-  }
-
-  // Normal week advancement (not transitioning to offseason)
-  // Update season
-  const { error: updateError } = await supabase
-    .from("seasons")
-    .update({
-      simulation_date: newDate.toISOString(),
-      phase: newPhase,
-      current_week: newWeek,
-      trade_deadline_passed: tradeDeadlinePassed,
-    })
-    .eq("id", franchise.current_season_id!);
-
-  if (updateError) {
-    return { success: false, error: "Failed to update season" };
-  }
-
-  // Run AI free agency during active offseason market phases
-  // Free agents can sign during: free_agency, draft, and training_camp
-  let freeAgencyMessage = "";
-  const activeMarketPhases = ["free_agency", "draft", "training_camp"];
-
-  if (activeMarketPhases.includes(newPhase)) {
-    const offseasonWeek = calculateOffseasonWeek(newDate, season.year);
-    if (offseasonWeek > 0) {
-      const faResult = await runWeeklyAIFreeAgency(
-        supabase,
-        franchise.current_season_id!,
-        offseasonWeek,
-        "medium",
-      );
-
-      if (faResult.success && faResult.playersSigned > 0) {
-        freeAgencyMessage = ` ${faResult.message}`;
-      }
-    }
-  }
-
-  // Revalidate relevant pages
-  revalidatePath(`/franchise/${franchiseId}`);
-  revalidatePath(`/franchise/${franchiseId}/schedule`);
-  revalidatePath(`/franchise/${franchiseId}/free-agents`);
+  // Combine all messages into a single message
+  const message = result.messages && result.messages.length > 0
+    ? result.messages.join(". ")
+    : undefined;
 
   return {
     success: true,
-    message: freeAgencyMessage || undefined,
+    message,
   };
 }
 
 /**
  * Advance simulation to a specific phase
+ * Now uses day-by-day simulation internally
  */
 export async function advanceToPhase(
   franchiseId: string,
   targetPhase: string,
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; message?: string }> {
   const supabase = await createClient();
 
   // Verify user owns this franchise
@@ -655,8 +857,6 @@ export async function advanceToPhase(
   if (seasonError || !season) {
     return { success: false, error: "Season not found" };
   }
-
-  const currentPhase = season.phase;
 
   // Get season dates
   const dates = require("@/lib/season/calendarUtils").getSeasonDates(season.year);
@@ -693,53 +893,33 @@ export async function advanceToPhase(
       return { success: false, error: "Invalid target phase" };
   }
 
-  // Get new phase and week
-  const newPhase = getPhaseFromDate(targetDate, season.year);
-  const newWeek = getWeekFromDate(targetDate, season.year);
-  const tradeDeadlinePassed = hasTradeDeadlinePassed(targetDate, season.year);
+  // Calculate how many days to advance
+  const currentDate = season.simulation_date
+    ? new Date(season.simulation_date)
+    : new Date(season.season_start_date || new Date());
 
-  // Check if we're transitioning to offseason (triggers season end processing)
-  if (shouldProcessSeasonEnd(currentPhase, newPhase)) {
-    console.log("Transitioning to offseason via advanceToPhase - processing season end...");
-    const transitionResult = await processSeasonEnd(franchiseId, franchise.current_season_id!);
+  const daysToAdvance = Math.ceil(
+    (targetDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
 
-    if (!transitionResult.success) {
-      return {
-        success: false,
-        error: transitionResult.error || "Failed to process season end",
-      };
-    }
-
-    // Revalidate all pages after season transition
-    revalidatePath(`/franchise/${franchiseId}`);
-    revalidatePath(`/franchise/${franchiseId}/schedule`);
-    revalidatePath(`/franchise/${franchiseId}/roster`);
-
-    return {
-      success: true,
-      message: `Season ended! ${transitionResult.stats?.playersRetired || 0} players retired, ${transitionResult.stats?.freeAgentsCreated || 0} became free agents, ${transitionResult.stats?.prospectsGenerated || 0} prospects generated for upcoming draft. Free agency period will begin soon!`,
-    };
+  if (daysToAdvance <= 0) {
+    return { success: false, error: "Target phase is in the past" };
   }
 
-  // Normal phase advancement (not transitioning to offseason)
-  // Update season
-  const { error: updateError } = await supabase
-    .from("seasons")
-    .update({
-      simulation_date: targetDate.toISOString(),
-      phase: newPhase,
-      current_week: newWeek,
-      trade_deadline_passed: tradeDeadlinePassed,
-    })
-    .eq("id", franchise.current_season_id!);
+  // Use day-by-day simulation to reach the target
+  const result = await advanceByDays(franchiseId, daysToAdvance);
 
-  if (updateError) {
-    return { success: false, error: "Failed to update season" };
+  if (!result.success) {
+    return { success: false, error: result.error };
   }
 
-  // Revalidate relevant pages
-  revalidatePath(`/franchise/${franchiseId}`);
-  revalidatePath(`/franchise/${franchiseId}/schedule`);
+  // Combine all messages into a single message
+  const message = result.messages && result.messages.length > 0
+    ? result.messages.join(". ")
+    : undefined;
 
-  return { success: true };
+  return {
+    success: true,
+    message,
+  };
 }

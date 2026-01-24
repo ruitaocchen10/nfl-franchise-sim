@@ -13,6 +13,7 @@ import {
 } from "@/lib/contracts/contractManager";
 import { generateDraftClass } from "@/lib/draft/prospectGenerator";
 import { getSeasonDates } from "@/lib/season/calendarUtils";
+import { generateTeamPersonality, saveTeamPersonality } from "@/lib/ai/personalityGenerator";
 
 interface SeasonTransitionResult {
   success: boolean;
@@ -181,17 +182,28 @@ export async function processSeasonEnd(
     console.log("Initializing standings...");
     await initializeStandings(supabase, newSeasonId);
 
-    // Step 7: Generate draft class
+    // Step 7: Generate AI team personalities for new season
+    console.log("Generating AI team personalities...");
+    const { data: teams } = await supabase.from("teams").select("id");
+    if (teams) {
+      for (const team of teams) {
+        const personality = await generateTeamPersonality(supabase, team.id, newSeasonId);
+        await saveTeamPersonality(supabase, personality);
+      }
+      console.log(`Generated personalities for ${teams.length} teams`);
+    }
+
+    // Step 8: Generate draft class
     console.log("Generating draft class...");
     const prospectsGenerated = await generateDraftClass(supabase, newSeasonId);
 
-    // Step 8: Generate schedule (placeholder for now)
+    // Step 9: Generate schedule (placeholder for now)
     // await generateSchedule(supabase, newSeasonId);
 
     // Note: AI Free Agency will run gradually during the free_agency phase
-    // via advanceToNextWeek() - not as a batch process here
+    // via day-by-day simulation with autonomous team agents
 
-    // Step 9: Log the progression
+    // Step 10: Log the progression
     await supabase.from("season_progression_log").insert({
       franchise_id: franchiseId,
       from_season_id: currentSeasonId,
@@ -204,7 +216,7 @@ export async function processSeasonEnd(
       prospects_generated: prospectsGenerated,
     });
 
-    // Step 10: Update franchise to point to new season
+    // Step 11: Update franchise to point to new season
     await supabase
       .from("franchises")
       .update({

@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
-import { advanceToNextWeek, advanceToPhase } from "@/app/actions/simulation";
+import { advanceToNextWeek, advanceToPhase, advanceByDays } from "@/app/actions/simulation";
 import { getSeasonDates } from "@/lib/season/calendarUtils";
 import { useState } from "react";
 
@@ -41,6 +41,7 @@ export default function UpcomingEvent({
   tradeDeadlinePassed,
 }: UpcomingEventProps) {
   const [isSimulating, setIsSimulating] = useState(false);
+  const [simulationMessages, setSimulationMessages] = useState<string[]>([]);
 
   const getEventTitle = () => {
     if (phase === 'regular_season' || phase === 'preseason' || phase === 'postseason') {
@@ -91,12 +92,37 @@ export default function UpcomingEvent({
     };
   };
 
+  const handleAdvanceDay = async () => {
+    setIsSimulating(true);
+    setSimulationMessages([]);
+    try {
+      const result = await advanceByDays(franchiseId, 1);
+      if (result.success && result.messages) {
+        setSimulationMessages(result.messages);
+      } else if (!result.success && result.error) {
+        setSimulationMessages([`Error: ${result.error}`]);
+      }
+    } catch (error) {
+      console.error("Failed to advance day:", error);
+      setSimulationMessages([`Error: ${error instanceof Error ? error.message : 'Unknown error'}`]);
+    } finally {
+      setIsSimulating(false);
+    }
+  };
+
   const handleAdvanceWeek = async () => {
     setIsSimulating(true);
+    setSimulationMessages([]);
     try {
-      await advanceToNextWeek(franchiseId);
+      const result = await advanceToNextWeek(franchiseId);
+      if (result.success && result.messages) {
+        setSimulationMessages(result.messages);
+      } else if (!result.success && result.error) {
+        setSimulationMessages([`Error: ${result.error}`]);
+      }
     } catch (error) {
       console.error("Failed to advance week:", error);
+      setSimulationMessages([`Error: ${error instanceof Error ? error.message : 'Unknown error'}`]);
     } finally {
       setIsSimulating(false);
     }
@@ -104,10 +130,17 @@ export default function UpcomingEvent({
 
   const handleAdvanceToPhase = async (targetPhase: string) => {
     setIsSimulating(true);
+    setSimulationMessages([]);
     try {
-      await advanceToPhase(franchiseId, targetPhase);
+      const result = await advanceToPhase(franchiseId, targetPhase);
+      if (result.success && result.messages) {
+        setSimulationMessages(result.messages);
+      } else if (!result.success && result.error) {
+        setSimulationMessages([`Error: ${result.error}`]);
+      }
     } catch (error) {
       console.error("Failed to advance to phase:", error);
+      setSimulationMessages([`Error: ${error instanceof Error ? error.message : 'Unknown error'}`]);
     } finally {
       setIsSimulating(false);
     }
@@ -214,6 +247,25 @@ export default function UpcomingEvent({
     );
   };
 
+  const renderMessages = () => {
+    if (simulationMessages.length === 0) return null;
+
+    return (
+      <div className="mt-4 mb-4 p-3 rounded-none" style={{ background: 'var(--bg-light)', borderLeft: '3px solid var(--accent-cyan)' }}>
+        <p className="text-sm font-bold mb-2" style={{ color: 'var(--accent-cyan)', fontFamily: 'var(--font-display)' }}>
+          Simulation Results:
+        </p>
+        <ul className="space-y-1">
+          {simulationMessages.map((msg, idx) => (
+            <li key={idx} className="text-sm" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
+              • {msg}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
   const getSimButtons = () => {
     const nextEvent = getNextMajorEvent();
     const buttonStyle = {
@@ -277,7 +329,17 @@ export default function UpcomingEvent({
 
     return (
       <div className="space-y-3 mt-6">
-        {/* Primary button: Sim to Next Week */}
+        {/* Primary button: Sim Day Forward */}
+        <button
+          onClick={handleAdvanceDay}
+          disabled={isSimulating}
+          className="block w-full py-3 rounded-none text-center font-bold uppercase tracking-wider transition-all hover:shadow-lg disabled:opacity-50"
+          style={isSimulating ? disabledButtonStyle : buttonStyle}
+        >
+          {isSimulating ? 'Simulating...' : 'Sim Day Forward'}
+        </button>
+
+        {/* Secondary button: Sim to Next Week */}
         <button
           onClick={handleAdvanceWeek}
           disabled={isSimulating}
@@ -287,7 +349,7 @@ export default function UpcomingEvent({
           {isSimulating ? 'Simulating...' : isInSeasonPhase() ? 'Sim to Next Game' : 'Sim to Next Week'}
         </button>
 
-        {/* Secondary button: Phase-specific */}
+        {/* Tertiary button: Phase-specific */}
         {secondaryButton}
       </div>
     );
@@ -309,6 +371,7 @@ export default function UpcomingEvent({
       </CardHeader>
       <CardContent>
         {renderContent()}
+        {renderMessages()}
         {getSimButtons()}
       </CardContent>
     </Card>
