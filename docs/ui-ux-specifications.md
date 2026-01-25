@@ -1,54 +1,82 @@
 # Cyberpunk UI Theme - NFL Franchise Simulator
+## Neon Digital Aesthetic with Sharp Geometry
 
-## Dark Dystopian Gaming Aesthetic
+> **Theme Inspiration**: Raw digital cyberpunk aesthetic with cyan-first color scheme, sharp geometric edges, animated grid backgrounds, and neon glow effects. Think dystopian sports management in a matrix-like digital world where data flows like electricity.
 
-> **Theme Inspiration**: Dark, futuristic, cyberpunk aesthetic with red accent lighting, navy/black backgrounds, and cyan highlights. Think dystopian sports management in a neon-lit digital world.
+---
+
+## Design Philosophy
+
+This cyberpunk theme creates an immersive digital experience with sharp, aggressive geometry and vibrant neon accents. The **cyan-first** color scheme evokes digital interfaces and holographic displays, while **magenta and purple** add dimension and depth. **Zero border-radius** throughout creates a raw, unpolished digital aesthetic - like looking at pure data streams.
+
+**Core Principles**:
+- **Sharp Corners** - All UI elements use `border-radius: 0` for aggressive, geometric feel
+- **Cyan Primary** - Cyan is the dominant accent for clarity and digital sophistication
+- **Grid Backgrounds** - Subtle animated grids add depth and "matrix" feel
+- **Glow Effects** - Neon glows on hover/focus for tactile feedback
+- **Gradient Text** - Color gradients on important text for visual hierarchy
+- **HSL Color System** - Allows precise transparency and color manipulation
 
 ---
 
 ## Color Palette
 
-### Primary Colors
+### Primary Cyberpunk Colors (HSL Format)
 
 ```css
-/* Dark Backgrounds */
---bg-darkest: #060810; /* Page background */
---bg-dark: #0a0e1a; /* Main sections */
---bg-medium: #0f1419; /* Cards, containers */
---bg-light: #1a2332; /* Elevated surfaces */
---bg-lighter: #1f2937; /* Hover states */
+/* Primary - Cyan (Digital/Tech) */
+--cyber-cyan: 185 100% 50%;
+/* Usage: Primary buttons, links, focus states, main accents */
+/* Example: hsl(var(--cyber-cyan) / 0.2) for 20% opacity background */
 
-/* Accent Colors */
---accent-red: #ff2943; /* Primary CTAs, danger, highlights */
---accent-red-dark: #d91f38; /* Red hover states */
---accent-red-bright: #ff3d5c; /* Bright red for emphasis */
---accent-cyan: #00d9ff; /* Links, info, secondary actions */
---accent-cyan-dark: #00b8d9; /* Cyan hover */
---accent-orange: #ff6b35; /* Warnings, tertiary actions */
---accent-purple: #a855f7; /* Special highlights */
+/* Secondary - Magenta (Highlights) */
+--cyber-magenta: 320 100% 60%;
+/* Usage: Secondary buttons, badges, special highlights */
 
-/* Status Colors */
---success: #00ff88; /* Wins, positive stats */
---warning: #ffaa00; /* Cautions, medium alerts */
---error: #ff2943; /* Losses, errors */
---info: #00d9ff; /* Info, neutral stats */
+/* Accent - Purple (Special Elements) */
+--cyber-purple: 270 100% 65%;
+/* Usage: Icons, tertiary actions, decorative elements */
 
-/* Text Colors */
---text-primary: #ffffff; /* Headings, important text */
---text-secondary: #b8c5d6; /* Body text */
---text-tertiary: #6b7a8f; /* Captions, metadata */
---text-muted: #4a5568; /* Disabled, very subtle */
---text-accent: #ff2943; /* Highlighted text */
+/* Warning/Highlight - Yellow */
+--cyber-yellow: 55 100% 55%;
+/* Usage: Warnings, "TODAY" indicators, attention grabbers */
 
-/* Borders */
---border-default: #2a3441; /* Standard borders */
---border-bright: #3d4d61; /* Hover borders */
---border-accent: #ff2943; /* Active/focus borders */
+/* Error - Red (Error States Only) */
+--cyber-red: 353 100% 59%;
+/* Usage: Error messages, destructive actions ONLY */
+```
 
-/* Special Effects */
---glow-red: rgba(255, 41, 67, 0.4);
---glow-cyan: rgba(0, 217, 255, 0.3);
---shadow-dark: rgba(0, 0, 0, 0.6);
+### Dark Backgrounds
+
+```css
+--bg-darkest: #060810;    /* Page background */
+--bg-dark: #0a0e1a;       /* Main sections */
+--bg-medium: #0f1419;     /* Cards, panels */
+--bg-light: #1a2332;      /* Elevated surfaces */
+
+/* HSL Versions for Transparency */
+--bg-darkest-hsl: 228 30% 5%;
+--bg-dark-hsl: 228 35% 7%;
+--bg-medium-hsl: 215 30% 9%;
+--bg-light-hsl: 214 24% 15%;
+```
+
+### Text Colors
+
+```css
+--text-primary: #ffffff;    /* Headings, important text */
+--text-secondary: #b8c5d6;  /* Body text */
+--text-tertiary: #6b7a8f;   /* Captions, metadata */
+--text-muted: #4a5568;      /* Disabled, very subtle */
+```
+
+### Status Colors
+
+```css
+--success: #00ff88;   /* Wins, positive stats */
+--warning: #ffaa00;   /* Cautions, medium alerts */
+--error: #ff2943;     /* Losses, critical errors */
+--info: #00d9ff;      /* Info, neutral stats */
 ```
 
 ---
@@ -64,451 +92,405 @@
 /* Body Text - Clean, Readable */
 --font-body: "Inter", "Roboto", system-ui, sans-serif;
 
-/* Monospace - Stats, Numbers, Code */
+/* Monospace - Stats, Numbers, Labels, Badges */
 --font-mono: "JetBrains Mono", "Roboto Mono", "Courier New", monospace;
-```
-
-### Font Sizes & Weights
-
-```css
-/* Display Text */
---text-6xl: 56px; /* Hero headings */
---text-5xl: 48px; /* Page titles */
---text-4xl: 36px; /* Section headers */
---text-3xl: 32px; /* Large headings */
---text-2xl: 24px; /* Subheadings */
---text-xl: 20px; /* Card titles */
-
-/* Body Text */
---text-lg: 18px; /* Large body */
---text-base: 16px; /* Standard body */
---text-sm: 14px; /* Small body */
---text-xs: 12px; /* Captions */
---text-2xs: 11px; /* Fine print */
-
-/* Font Weights */
---font-light: 300;
---font-regular: 400;
---font-medium: 500;
---font-semibold: 600;
---font-bold: 700;
---font-extrabold: 800;
---font-black: 900;
 ```
 
 ### Typography Usage
 
 ```css
-/* Display Headings */
-h1,
-.display-1 {
+/* Hero Heading - With Gradient */
+h1 {
   font-family: var(--font-display);
-  font-size: var(--text-5xl);
-  font-weight: var(--font-bold);
+  font-size: 48px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-primary);
-  text-shadow: 0 0 20px var(--glow-red);
+  background: linear-gradient(
+    135deg,
+    var(--text-primary) 0%,
+    hsl(var(--cyber-cyan)) 50%,
+    hsl(var(--cyber-magenta)) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* Section Headings */
 h2 {
   font-family: var(--font-display);
-  font-size: var(--text-3xl);
-  font-weight: var(--font-bold);
+  font-size: 32px;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
-/* Card/Component Headings */
+/* Card Headings */
 h3 {
   font-family: var(--font-display);
-  font-size: var(--text-xl);
-  font-weight: var(--font-semibold);
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: var(--text-primary);
 }
 
 /* Body Text */
-p,
-.body {
+p {
   font-family: var(--font-body);
-  font-size: var(--text-base);
-  font-weight: var(--font-regular);
+  font-size: 16px;
   color: var(--text-secondary);
   line-height: 1.6;
 }
 
 /* Stats & Numbers */
-.stat,
-.number {
+.stat {
   font-family: var(--font-mono);
-  font-weight: var(--font-bold);
-  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 36px;
+  color: hsl(var(--cyber-cyan));
 }
-```
 
----
-
-## Spacing System
-
-```css
-/* 4px Base Grid */
---space-1: 4px;
---space-2: 8px;
---space-3: 12px;
---space-4: 16px;
---space-5: 20px;
---space-6: 24px;
---space-8: 32px;
---space-10: 40px;
---space-12: 48px;
---space-16: 64px;
---space-20: 80px;
---space-24: 96px;
+/* Labels & Badges */
+.label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: hsl(var(--cyber-cyan));
+}
 ```
 
 ---
 
 ## Component Styles
 
-### Buttons
+### Cyber Panel (Base Container)
+
+**Sharp corners, glowing borders, optional grid background**
 
 ```css
-/* Primary Button (Red Accent) */
-.btn-primary {
-  background: linear-gradient(135deg, #ff2943 0%, #ff3d5c 100%);
-  color: #ffffff;
-  font-family: var(--font-display);
-  font-size: 14px;
+.cyber-panel {
+  position: relative;
+  background: var(--bg-medium);
+  border: 1px solid var(--border-default);
+  border-radius: 0; /* SHARP CORNERS */
+  box-shadow:
+    0 0 20px -5px hsl(var(--cyber-cyan) / 0.2),
+    inset 0 1px 0 0 hsl(var(--cyber-cyan) / 0.1);
+  padding: 24px;
+}
+
+/* Gradient overlay */
+.cyber-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--cyber-cyan) / 0.1) 0%,
+    transparent 50%,
+    hsl(var(--cyber-magenta) / 0.05) 100%
+  );
+}
+
+/* Animated grid background */
+.cyber-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.2;
+  background-image:
+    linear-gradient(hsl(var(--cyber-cyan) / 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--cyber-cyan) / 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 20%,
+    black 80%,
+    transparent
+  );
+}
+```
+
+### Buttons
+
+**Sharp corners, neon glows, shimmer hover effects**
+
+```css
+/* Primary Button - Cyan */
+.cyber-button {
+  position: relative;
+  overflow: hidden;
+  padding: 12px 24px;
+  font-family: var(--font-mono);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  box-shadow:
-    0 4px 12px rgba(255, 41, 67, 0.3),
-    0 0 20px rgba(255, 41, 67, 0.2);
-  transition: all 0.2s ease;
+  background: hsl(var(--cyber-cyan) / 0.2);
+  color: hsl(var(--cyber-cyan));
+  border: 1px solid hsl(var(--cyber-cyan) / 0.5);
+  border-radius: 0; /* SHARP CORNERS */
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 6px 16px rgba(255, 41, 67, 0.4),
-    0 0 30px rgba(255, 41, 67, 0.3);
+.cyber-button:hover {
+  background: hsl(var(--cyber-cyan) / 0.3);
+  box-shadow: 0 0 20px -5px hsl(var(--cyber-cyan) / 0.5);
 }
 
-.btn-primary:active {
-  transform: translateY(0);
+/* Shimmer effect */
+.cyber-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--cyber-cyan) / 0.2),
+    transparent
+  );
+  transition: opacity 0.2s ease;
 }
 
-/* Secondary Button (Cyan Accent) */
-.btn-secondary {
-  background: transparent;
-  color: #00d9ff;
-  border: 2px solid #00d9ff;
-  font-family: var(--font-display);
-  font-size: 14px;
+.cyber-button:hover::before {
+  opacity: 1;
+  animation: shimmer 1s ease-in-out;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Secondary Button - Magenta */
+.cyber-button-secondary {
+  background: hsl(var(--cyber-magenta) / 0.2);
+  color: hsl(var(--cyber-magenta));
+  border-color: hsl(var(--cyber-magenta) / 0.5);
+}
+
+.cyber-button-secondary:hover {
+  background: hsl(var(--cyber-magenta) / 0.3);
+  box-shadow: 0 0 20px -5px hsl(var(--cyber-magenta) / 0.5);
+}
+
+/* Accent Button - Purple */
+.cyber-button-accent {
+  background: hsl(var(--cyber-purple) / 0.2);
+  color: hsl(var(--cyber-purple));
+  border-color: hsl(var(--cyber-purple) / 0.5);
+}
+
+.cyber-button-accent:hover {
+  background: hsl(var(--cyber-purple) / 0.3);
+  box-shadow: 0 0 20px -5px hsl(var(--cyber-purple) / 0.5);
+}
+```
+
+### Badges
+
+**Sharp corners, monospace font, pulsing animation for emphasis**
+
+```css
+.cyber-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: var(--font-mono);
   font-weight: 600;
   text-transform: uppercase;
-  padding: 10px 24px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  letter-spacing: 0.1em;
+  background: hsl(var(--cyber-cyan) / 0.2);
+  color: hsl(var(--cyber-cyan));
+  border: 1px solid hsl(var(--cyber-cyan) / 0.3);
+  border-radius: 0; /* SHARP CORNERS */
 }
 
-.btn-secondary:hover {
-  background: rgba(0, 217, 255, 0.1);
-  box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+.cyber-badge-secondary {
+  background: hsl(var(--cyber-magenta) / 0.2);
+  color: hsl(var(--cyber-magenta));
+  border-color: hsl(var(--cyber-magenta) / 0.3);
 }
 
-/* Ghost Button */
-.btn-ghost {
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-default);
-  padding: 10px 20px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
+.cyber-badge-yellow {
+  background: hsl(var(--cyber-yellow) / 0.2);
+  color: hsl(var(--cyber-yellow));
+  border-color: hsl(var(--cyber-yellow) / 0.3);
+  animation: pulse-glow-badge 2s ease-in-out infinite;
 }
 
-.btn-ghost:hover {
-  border-color: var(--border-bright);
-  color: var(--text-primary);
-  background: var(--bg-light);
-}
-
-/* Danger Button */
-.btn-danger {
-  background: var(--bg-medium);
-  color: var(--error);
-  border: 1px solid var(--error);
-  padding: 10px 24px;
-  border-radius: 8px;
-}
-
-.btn-danger:hover {
-  background: rgba(255, 41, 67, 0.1);
-  box-shadow: 0 0 15px rgba(255, 41, 67, 0.2);
+@keyframes pulse-glow-badge {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 ```
 
-### Cards
+### Input Fields
+
+**Sharp corners, cyan glow on focus, monospace font**
 
 ```css
-/* Standard Card */
-.card {
-  background: var(--bg-medium);
-  border: 1px solid var(--border-default);
-  border-radius: 12px;
-  padding: var(--space-6);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  transition: all 0.3s ease;
-}
-
-.card:hover {
-  border-color: var(--border-bright);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-  transform: translateY(-2px);
-}
-
-/* Glowing Card (Featured) */
-.card-glow {
-  background: linear-gradient(135deg, #1a2332 0%, #1f2937 100%);
-  border: 1px solid var(--accent-red);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.4),
-    0 0 30px var(--glow-red);
-}
-
-/* Card with Header */
-.card-header {
-  background: var(--bg-light);
-  border-bottom: 1px solid var(--border-default);
-  padding: var(--space-4) var(--space-6);
-  border-radius: 12px 12px 0 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  color: var(--text-primary);
-  text-transform: uppercase;
-  font-size: 14px;
-  letter-spacing: 0.08em;
-}
-```
-
-### Inputs & Forms
-
-```css
-/* Text Input */
-.input {
-  background: var(--bg-light);
-  border: 1px solid var(--border-default);
-  border-radius: 6px;
+.cyber-input {
+  width: 100%;
   padding: 12px 16px;
-  color: var(--text-primary);
-  font-family: var(--font-body);
+  font-family: var(--font-mono);
   font-size: 14px;
+  background: var(--bg-light);
+  border: 1px solid var(--border-default);
+  border-radius: 0; /* SHARP CORNERS */
+  color: var(--text-primary);
   transition: all 0.2s ease;
 }
 
-.input:focus {
+.cyber-input:focus {
   outline: none;
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+  border-color: hsl(var(--cyber-cyan));
+  box-shadow: 0 0 0 3px hsl(var(--cyber-cyan) / 0.2);
 }
 
-.input::placeholder {
+.cyber-input::placeholder {
   color: var(--text-muted);
 }
 
-/* Select Dropdown */
-.select {
-  background: var(--bg-light);
-  border: 1px solid var(--border-default);
-  border-radius: 6px;
-  padding: 12px 40px 12px 16px;
-  color: var(--text-primary);
-  cursor: pointer;
-}
-
-/* Checkbox/Radio (Custom) */
-.checkbox {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--border-default);
-  border-radius: 4px;
-  background: var(--bg-light);
-  transition: all 0.2s ease;
-}
-
-.checkbox:checked {
-  background: var(--accent-red);
-  border-color: var(--accent-red);
-  box-shadow: 0 0 10px var(--glow-red);
-}
-```
-
-### Tables
-
-```css
-/* Table Container */
-.table-container {
-  background: var(--bg-medium);
-  border: 1px solid var(--border-default);
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-/* Table Header */
-.table-header {
-  background: var(--bg-light);
-  border-bottom: 2px solid var(--border-bright);
-  font-family: var(--font-display);
+/* Label */
+.cyber-label {
+  display: block;
+  font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--text-secondary);
+  color: hsl(var(--cyber-cyan));
+  margin-bottom: 8px;
 }
 
-/* Table Row */
-.table-row {
-  border-bottom: 1px solid var(--border-default);
-  transition: background 0.2s ease;
+/* Error State */
+.cyber-input-error {
+  border-color: hsl(var(--cyber-red));
 }
 
-.table-row:hover {
-  background: var(--bg-light);
-}
-
-/* Table Cell */
-.table-cell {
-  padding: var(--space-4);
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-/* Stat Cell (Numbers) */
-.table-cell-stat {
-  font-family: var(--font-mono);
-  font-weight: 600;
-  color: var(--text-primary);
-}
-```
-
-### Badges & Pills
-
-```css
-/* Status Badge */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.badge-success {
-  background: rgba(0, 255, 136, 0.15);
-  color: var(--success);
-  border: 1px solid var(--success);
-}
-
-.badge-warning {
-  background: rgba(255, 170, 0, 0.15);
-  color: var(--warning);
-  border: 1px solid var(--warning);
-}
-
-.badge-error {
-  background: rgba(255, 41, 67, 0.15);
-  color: var(--error);
-  border: 1px solid var(--error);
-}
-
-.badge-info {
-  background: rgba(0, 217, 255, 0.15);
-  color: var(--info);
-  border: 1px solid var(--info);
+.cyber-input-error:focus {
+  box-shadow: 0 0 0 3px hsl(var(--cyber-red) / 0.2);
 }
 ```
 
 ### Modals
 
+**Sharp corners, grid background, cyan glow, blurred backdrop**
+
 ```css
-/* Modal Backdrop */
+/* Backdrop */
 .modal-backdrop {
-  background: rgba(6, 8, 16, 0.8);
-  backdrop-filter: blur(8px);
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 8, 16, 0.9);
+  backdrop-filter: blur(12px);
 }
 
 /* Modal Container */
 .modal {
-  background: var(--bg-medium);
-  border: 1px solid var(--border-bright);
-  border-radius: 16px;
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.6),
-    0 0 60px rgba(255, 41, 67, 0.15);
-  max-width: 600px;
+  position: relative;
   width: 90%;
+  max-width: 600px;
+  background: var(--bg-medium);
+  border: 1px solid var(--border-default);
+  border-radius: 0; /* SHARP CORNERS */
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.8),
+    0 0 60px hsl(var(--cyber-cyan) / 0.2);
 }
 
 /* Modal Header */
 .modal-header {
+  padding: 24px;
   background: var(--bg-light);
-  border-bottom: 1px solid var(--border-default);
-  padding: var(--space-6);
-  border-radius: 16px 16px 0 0;
+  border-bottom: 1px solid transparent;
+  background-image: linear-gradient(
+    90deg,
+    hsl(var(--cyber-cyan) / 0.5) 0%,
+    transparent 100%
+  );
+  background-size: 100% 1px;
+  background-position: bottom;
+  background-repeat: no-repeat;
 }
 
-/* Modal Title */
 .modal-title {
   font-family: var(--font-display);
-  font-size: var(--text-2xl);
+  font-size: 24px;
   font-weight: 700;
-  color: var(--text-primary);
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
 }
 ```
 
 ---
 
-## Visual Effects & Animations
+## Visual Effects
 
-### Glows
+### Gradient Text
+
+**Cyan to Magenta gradient for hero elements**
 
 ```css
-/* Red Glow */
-.glow-red {
-  box-shadow:
-    0 0 20px rgba(255, 41, 67, 0.4),
-    0 0 40px rgba(255, 41, 67, 0.2),
-    0 0 60px rgba(255, 41, 67, 0.1);
+.cyber-date-main {
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 700;
+  background: linear-gradient(
+    135deg,
+    var(--text-primary) 0%,
+    hsl(var(--cyber-cyan)) 50%,
+    hsl(var(--cyber-magenta)) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
+```
 
+### Glow Effects
+
+```css
 /* Cyan Glow */
 .glow-cyan {
   box-shadow:
-    0 0 15px rgba(0, 217, 255, 0.4),
-    0 0 30px rgba(0, 217, 255, 0.2);
+    0 0 15px hsl(var(--cyber-cyan) / 0.4),
+    0 0 30px hsl(var(--cyber-cyan) / 0.2);
+}
+
+/* Magenta Glow */
+.glow-magenta {
+  box-shadow:
+    0 0 15px hsl(var(--cyber-magenta) / 0.4),
+    0 0 30px hsl(var(--cyber-magenta) / 0.2);
+}
+
+/* Purple Glow */
+.glow-purple {
+  box-shadow:
+    0 0 15px hsl(var(--cyber-purple) / 0.4),
+    0 0 30px hsl(var(--cyber-purple) / 0.2);
 }
 
 /* Pulsing Glow Animation */
 @keyframes pulse-glow {
-  0%,
-  100% {
+  0%, 100% {
     box-shadow:
-      0 0 20px rgba(255, 41, 67, 0.4),
-      0 0 40px rgba(255, 41, 67, 0.2);
+      0 0 20px hsl(var(--cyber-cyan) / 0.4),
+      0 0 40px hsl(var(--cyber-cyan) / 0.2);
   }
   50% {
     box-shadow:
-      0 0 30px rgba(255, 41, 67, 0.6),
-      0 0 60px rgba(255, 41, 67, 0.3);
+      0 0 30px hsl(var(--cyber-cyan) / 0.6),
+      0 0 60px hsl(var(--cyber-cyan) / 0.3);
   }
 }
 
@@ -517,51 +499,43 @@ p,
 }
 ```
 
-### Gradients
+### Scanline Effect (Optional)
+
+**Retro CRT scanline animation**
 
 ```css
-/* Background Gradient */
-.bg-gradient {
-  background: linear-gradient(135deg, #060810 0%, #0f1419 50%, #0a0e1a 100%);
-}
-
-/* Card Gradient */
-.bg-card-gradient {
-  background: linear-gradient(135deg, #1a2332 0%, #1f2937 100%);
-}
-
-/* Red Accent Gradient */
-.bg-red-gradient {
-  background: linear-gradient(90deg, #ff2943 0%, #ff6b35 100%);
-}
-
-/* Cyan Accent Gradient */
-.bg-cyan-gradient {
-  background: linear-gradient(90deg, #00d9ff 0%, #0099ff 100%);
-}
-
-/* Overlay Gradient (for images) */
-.overlay-gradient {
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(6, 8, 16, 0.6) 50%,
-    rgba(6, 8, 16, 0.9) 100%
+.cyber-scanline {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    var(--text-primary) 2px,
+    var(--text-primary) 4px
   );
+  animation: scanline-move 8s linear infinite;
+}
+
+@keyframes scanline-move {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(20px); }
 }
 ```
 
-### Animations
+---
+
+## Animations
+
+### Core Animations
 
 ```css
 /* Fade In */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .fade-in {
@@ -584,131 +558,79 @@ p,
   animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Hover Lift */
-.hover-lift {
-  transition: transform 0.2s ease;
-}
-
-.hover-lift:hover {
-  transform: translateY(-4px);
-}
-
-/* Scan Line Effect (Optional Cyberpunk Detail) */
-@keyframes scanline {
-  0% {
-    transform: translateY(-100%);
-  }
-  100% {
-    transform: translateY(100vh);
-  }
-}
-
-.scanline {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgba(0, 217, 255, 0.5),
-    transparent
-  );
-  animation: scanline 8s linear infinite;
-  pointer-events: none;
-  opacity: 0.3;
+/* Shimmer (Button Hover) */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 ```
 
 ---
 
-## Layout Patterns
-
-### Dashboard Grid
+## Spacing System
 
 ```css
-/* Main Dashboard Layout */
-.dashboard {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: var(--space-6);
-  padding: var(--space-8);
-  background: var(--bg-darkest);
-}
-
-/* Hero Section */
-.dashboard-hero {
-  grid-column: 1 / -1;
-  background: linear-gradient(135deg, #1a2332 0%, #1f2937 100%);
-  border: 1px solid var(--border-default);
-  border-radius: 16px;
-  padding: var(--space-12);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Main Content */
-.dashboard-main {
-  grid-column: 1 / 9;
-}
-
-/* Sidebar */
-.dashboard-sidebar {
-  grid-column: 9 / -1;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-  .dashboard-main,
-  .dashboard-sidebar {
-    grid-column: 1 / -1;
-  }
-}
-```
-
-### Card Grids
-
-```css
-/* 3-Column Card Grid */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--space-6);
-}
-
-/* 2-Column Stat Grid */
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4);
-}
+/* 4px Base Grid */
+--space-1: 4px;
+--space-2: 8px;
+--space-3: 12px;
+--space-4: 16px;
+--space-6: 24px;
+--space-8: 32px;
+--space-12: 48px;
+--space-16: 64px;
 ```
 
 ---
 
-## Icon Styles
+## Utility Classes
+
+### Text Colors
 
 ```css
-/* Icon Container */
-.icon {
-  width: 24px;
-  height: 24px;
-  color: var(--text-secondary);
-  transition: color 0.2s ease;
+.text-cyber-cyan { color: hsl(var(--cyber-cyan)); }
+.text-cyber-magenta { color: hsl(var(--cyber-magenta)); }
+.text-cyber-purple { color: hsl(var(--cyber-purple)); }
+.text-cyber-yellow { color: hsl(var(--cyber-yellow)); }
+```
+
+### Background Colors
+
+```css
+.bg-cyber-cyan-20 { background-color: hsl(var(--cyber-cyan) / 0.2); }
+.bg-cyber-magenta-20 { background-color: hsl(var(--cyber-magenta) / 0.2); }
+.bg-cyber-purple-20 { background-color: hsl(var(--cyber-purple) / 0.2); }
+```
+
+### Border Colors
+
+```css
+.border-cyber-cyan-50 { border-color: hsl(var(--cyber-cyan) / 0.5); }
+.border-cyber-magenta-50 { border-color: hsl(var(--cyber-magenta) / 0.5); }
+.border-cyber-purple-50 { border-color: hsl(var(--cyber-purple) / 0.5); }
+```
+
+---
+
+## Accessibility
+
+```css
+/* Focus States - Cyan Ring */
+*:focus-visible {
+  outline: 2px solid hsl(var(--cyber-cyan));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px hsl(var(--cyber-cyan) / 0.1);
 }
 
-.icon-primary {
-  color: var(--accent-red);
-}
-
-.icon-secondary {
-  color: var(--accent-cyan);
-}
-
-/* Icon with Glow */
-.icon-glow {
-  filter: drop-shadow(0 0 8px currentColor);
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 ```
 
@@ -730,168 +652,45 @@ p,
 
 /* Tablet */
 @media (min-width: 641px) and (max-width: 1024px) {
-  .dashboard {
-    grid-template-columns: repeat(8, 1fr);
-  }
+  /* Adjust grid layouts */
 }
 
 /* Desktop */
 @media (min-width: 1025px) {
-  .dashboard {
-    grid-template-columns: repeat(12, 1fr);
-  }
+  /* Full 12-column grid */
 }
 ```
 
 ---
 
-## Accessibility
+## Key Differences from Traditional Cyberpunk
 
-```css
-/* Focus States */
-*:focus {
-  outline: 2px solid var(--accent-cyan);
-  outline-offset: 2px;
-}
-
-/* Focus Visible (Keyboard Only) */
-*:focus:not(:focus-visible) {
-  outline: none;
-}
-
-*:focus-visible {
-  outline: 2px solid var(--accent-cyan);
-  outline-offset: 2px;
-}
-
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-```
+1. **Cyan-First, Not Red** - Cyan is the primary accent (not red)
+2. **Sharp Corners Everywhere** - `border-radius: 0` for aggressive geometry
+3. **Grid Backgrounds** - Animated matrix-style grids on panels
+4. **HSL Color System** - Allows precise transparency control
+5. **Shimmer Effects** - Sliding gradient on button hover
+6. **Gradient Text** - Cyan to Magenta gradients on hero elements
+7. **Tri-Color Harmony** - Cyan/Magenta/Purple work together
+8. **Monospace Labels** - All badges/labels use monospace fonts
 
 ---
 
-## Special UI Elements
+## Implementation Checklist
 
-### Progress Bars
-
-```css
-.progress-bar {
-  background: var(--bg-light);
-  border-radius: 8px;
-  height: 8px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  background: linear-gradient(90deg, #ff2943 0%, #ff6b35 100%);
-  height: 100%;
-  border-radius: 8px;
-  box-shadow: 0 0 15px var(--glow-red);
-  transition: width 0.3s ease;
-}
-```
-
-### Dividers
-
-```css
-.divider {
-  height: 1px;
-  background: var(--border-default);
-  margin: var(--space-8) 0;
-}
-
-.divider-glow {
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--accent-red) 50%,
-    transparent 100%
-  );
-  box-shadow: 0 0 10px var(--glow-red);
-}
-```
-
-### Loading Spinners
-
-```css
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--bg-light);
-  border-top-color: var(--accent-red);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  box-shadow: 0 0 20px var(--glow-red);
-}
-```
+- [x] Install fonts (Rajdhani, Inter, JetBrains Mono)
+- [x] Set up HSL color variables
+- [x] Create cyber-panel base component
+- [x] Build cyber-button with shimmer effect
+- [x] Add cyber-badge variants
+- [x] Implement grid backgrounds
+- [x] Add glow utilities
+- [x] Test sharp corners throughout
+- [x] Verify gradient text rendering
+- [x] Ensure cyan focus states
+- [x] Test accessibility (WCAG AA)
+- [x] Verify responsive behavior
 
 ---
 
-## Implementation Notes
-
-### Tailwind Config Extension
-
-```javascript
-// tailwind.config.js
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        "bg-darkest": "#060810",
-        "bg-dark": "#0a0e1a",
-        "accent-red": "#ff2943",
-        "accent-cyan": "#00d9ff",
-        // ... add all colors
-      },
-      fontFamily: {
-        display: ["Rajdhani", "Orbitron", "sans-serif"],
-        body: ["Inter", "Roboto", "system-ui"],
-        mono: ["JetBrains Mono", "monospace"],
-      },
-      boxShadow: {
-        "glow-red": "0 0 20px rgba(255, 41, 67, 0.4)",
-        "glow-cyan": "0 0 15px rgba(0, 217, 255, 0.3)",
-      },
-    },
-  },
-};
-```
-
-### Next Steps
-
-1. **Install Fonts**: Add Rajdhani, Inter, and JetBrains Mono via Google Fonts or self-host
-2. **Update Tailwind**: Extend config with custom colors, shadows, and fonts
-3. **Create Base Styles**: Apply theme to globals.css
-4. **Build Components**: Start with buttons, cards, and inputs
-5. **Test Accessibility**: Ensure contrast ratios meet WCAG AA standards
-6. **Add Animations**: Implement glows and transitions
-7. **Responsive Testing**: Verify on mobile, tablet, desktop
-
----
-
-## Design Philosophy
-
-This cyberpunk theme creates a dark, immersive experience that feels like managing a sports franchise in a dystopian digital future. The red accent provides urgency and energy, while the cyan creates technological sophistication. Dark backgrounds reduce eye strain during long sessions, and the futuristic typography reinforces the gaming aesthetic.
-
-**Key Principles**:
-
-- Dark backgrounds for focus and immersion
-- Bright accents for important actions and data
-- Glows and shadows for depth and hierarchy
-- Bold typography for clarity and impact
-- Smooth animations for polish and feedback
+**This cyberpunk theme is raw, digital, and unapologetically geometric - like pure data visualized in neon.**

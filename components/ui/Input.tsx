@@ -1,6 +1,6 @@
 /**
- * Input Component
- * Reusable input field with validation states
+ * Input Component - Cyberpunk Edition
+ * Reusable input field with cyberpunk styling and validation states
  */
 
 import { InputHTMLAttributes, forwardRef } from 'react'
@@ -21,8 +21,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium mb-1"
-            style={{ color: 'var(--text-secondary)' }}
+            className="block text-xs font-bold font-mono uppercase tracking-wider mb-2"
+            style={{ color: 'hsl(var(--cyber-cyan))' }}
           >
             {label}
           </label>
@@ -31,20 +31,20 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'w-full px-4 py-3 border rounded-md shadow-sm',
-            'focus:outline-none focus:ring-1',
+            'w-full px-4 py-3 border',
+            'focus:outline-none focus:ring-2 focus:ring-offset-0',
             'disabled:opacity-50 disabled:cursor-not-allowed',
             'transition-all',
+            'font-mono',
             error
-              ? 'border-error focus:ring-error focus:border-error'
-              : 'focus:ring-accent-cyan focus:border-accent-cyan',
+              ? 'border-[hsl(var(--cyber-red))] focus:ring-[hsl(var(--cyber-red)/0.3)] focus:border-[hsl(var(--cyber-red))]'
+              : 'border-border-default focus:ring-[hsl(var(--cyber-cyan)/0.3)] focus:border-[hsl(var(--cyber-cyan))]',
             className
           )}
           style={{
             background: 'var(--bg-light)',
-            borderColor: error ? 'var(--error)' : 'var(--border-default)',
             color: 'var(--text-primary)',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            borderRadius: '0',
             ...style
           }}
           aria-invalid={error ? 'true' : 'false'}
@@ -52,12 +52,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {error && (
-          <p id={`${inputId}-error`} className="mt-1 text-sm" style={{ color: 'var(--error)' }}>
-            {error}
+          <p id={`${inputId}-error`} className="mt-2 text-xs font-mono" style={{ color: 'hsl(var(--cyber-red))' }}>
+            ⚠ {error}
           </p>
         )}
         {!error && helperText && (
-          <p id={`${inputId}-helper`} className="mt-1 text-sm" style={{ color: 'var(--text-tertiary)' }}>
+          <p id={`${inputId}-helper`} className="mt-2 text-xs font-mono" style={{ color: 'var(--text-tertiary)' }}>
             {helperText}
           </p>
         )}
