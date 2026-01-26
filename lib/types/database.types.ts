@@ -811,6 +811,50 @@ export interface Database {
         }
         Relationships: []
       }
+      free_agents: {
+        Row: {
+          id: string
+          season_id: string
+          player_id: string
+          previous_team_id: string
+          previous_contract_value: number | null
+          market_value: number
+          status: 'available' | 'signed' | 'retired'
+          interested_teams: Json
+          signed_team_id: string | null
+          signed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          season_id: string
+          player_id: string
+          previous_team_id?: string | null
+          previous_contract_value?: number | null
+          market_value: number
+          status?: 'available' | 'signed' | 'retired'
+          interested_teams?: Json
+          signed_team_id?: string | null
+          signed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          season_id?: string
+          player_id?: string
+          previous_team_id?: string | null
+          previous_contract_value?: number | null
+          market_value?: number
+          status?: 'available' | 'signed' | 'retired'
+          interested_teams?: Json
+          signed_team_id?: string | null
+          signed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

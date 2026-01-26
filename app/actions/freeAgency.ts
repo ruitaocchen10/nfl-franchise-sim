@@ -16,8 +16,6 @@ interface FreeAgent {
   previous_contract_value: number;
   market_value: number;
   status: string;
-  signed_team_id: string | null;
-  signed_at: string | null;
   player: {
     id: string;
     first_name: string;
@@ -45,11 +43,6 @@ interface FreeAgent {
     city: string;
     name: string;
   };
-  signed_team: {
-    abbreviation: string;
-    city: string;
-    name: string;
-  } | null;
 }
 
 /**
@@ -87,12 +80,11 @@ export async function getFreeAgents(
       `
       *,
       player:players!free_agents_player_id_fkey(*),
-      previous_team:teams!free_agents_previous_team_id_fkey(abbreviation, city, name),
-      signed_team:teams!free_agents_signed_team_id_fkey(abbreviation, city, name)
+      previous_team:teams!free_agents_previous_team_id_fkey(abbreviation, city, name)
     `,
     )
     .eq("season_id", franchise.current_season_id!)
-    .in("status", ["available", "signed"]); // Show both available and recently signed agents
+    .eq("status", "available"); // Only show available agents
 
   const { data: freeAgents, error: freeAgentsError } = await query;
 
@@ -134,7 +126,12 @@ export async function getFreeAgents(
  */
 export async function getCapSpace(
   franchiseId: string,
-): Promise<{ success: boolean; capSpace?: number; salaryCap?: number; error?: string }> {
+): Promise<{
+  success: boolean;
+  capSpace?: number;
+  salaryCap?: number;
+  error?: string;
+}> {
   const supabase = await createClient();
 
   const {

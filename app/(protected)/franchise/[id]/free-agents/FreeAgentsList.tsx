@@ -164,8 +164,12 @@ export default function FreeAgentsList({
               }}
             />
           </div>
-          <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
-            {formatCurrency(salaryCap - capSpace)} used of {formatCurrency(salaryCap)}
+          <p
+            className="text-sm mt-2"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            {formatCurrency(salaryCap - capSpace)} used of{" "}
+            {formatCurrency(salaryCap)}
           </p>
         </CardContent>
       </Card>
@@ -257,7 +261,8 @@ export default function FreeAgentsList({
         {/* Results Count */}
         <div className="ml-auto">
           <p style={{ color: "var(--text-secondary)" }}>
-            {sortedAgents.length} free agent{sortedAgents.length !== 1 ? "s" : ""}
+            {sortedAgents.length} free agent
+            {sortedAgents.length !== 1 ? "s" : ""}
           </p>
         </div>
       </div>
@@ -267,7 +272,8 @@ export default function FreeAgentsList({
         <Card style={{ background: "var(--bg-medium)" }}>
           <CardContent className="p-12 text-center">
             <p style={{ color: "var(--text-secondary)" }}>
-              No free agents available {selectedPosition !== "all" && `at ${selectedPosition}`}
+              No free agents available{" "}
+              {selectedPosition !== "all" && `at ${selectedPosition}`}
             </p>
           </CardContent>
         </Card>
@@ -320,7 +326,9 @@ export default function FreeAgentsList({
                           className="flex items-center gap-3 mt-1"
                           style={{ color: "var(--text-secondary)" }}
                         >
-                          <span className="font-bold">{fa.player.position}</span>
+                          <span className="font-bold">
+                            {fa.player.position}
+                          </span>
                           <span>•</span>
                           <span>Age {attrs?.age}</span>
                           <span>•</span>
@@ -329,16 +337,21 @@ export default function FreeAgentsList({
                             <>
                               <span>•</span>
                               <span>
-                                {formatHeight(fa.player.height_inches)}, {fa.player.weight_lbs} lbs
+                                {formatHeight(fa.player.height_inches)},{" "}
+                                {fa.player.weight_lbs} lbs
                               </span>
                             </>
                           )}
                         </div>
                         <div
                           className="mt-1"
-                          style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}
+                          style={{
+                            color: "var(--text-secondary)",
+                            fontSize: "0.9rem",
+                          }}
                         >
-                          Previous: {fa.previous_team.city} {fa.previous_team.name}
+                          Previous: {fa.previous_team.city}{" "}
+                          {fa.previous_team.name}
                         </div>
                       </div>
                     </div>
@@ -348,14 +361,30 @@ export default function FreeAgentsList({
                       {/* Key Stats */}
                       {attrs && (
                         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                          <div style={{ color: "var(--text-secondary)" }}>SPD:</div>
-                          <div style={{ color: "var(--text-primary)" }}>{attrs.speed}</div>
-                          <div style={{ color: "var(--text-secondary)" }}>STR:</div>
-                          <div style={{ color: "var(--text-primary)" }}>{attrs.strength}</div>
-                          <div style={{ color: "var(--text-secondary)" }}>AGI:</div>
-                          <div style={{ color: "var(--text-primary)" }}>{attrs.agility}</div>
-                          <div style={{ color: "var(--text-secondary)" }}>AWR:</div>
-                          <div style={{ color: "var(--text-primary)" }}>{attrs.awareness}</div>
+                          <div style={{ color: "var(--text-secondary)" }}>
+                            SPD:
+                          </div>
+                          <div style={{ color: "var(--text-primary)" }}>
+                            {attrs.speed}
+                          </div>
+                          <div style={{ color: "var(--text-secondary)" }}>
+                            STR:
+                          </div>
+                          <div style={{ color: "var(--text-primary)" }}>
+                            {attrs.strength}
+                          </div>
+                          <div style={{ color: "var(--text-secondary)" }}>
+                            AGI:
+                          </div>
+                          <div style={{ color: "var(--text-primary)" }}>
+                            {attrs.agility}
+                          </div>
+                          <div style={{ color: "var(--text-secondary)" }}>
+                            AWR:
+                          </div>
+                          <div style={{ color: "var(--text-primary)" }}>
+                            {attrs.awareness}
+                          </div>
                         </div>
                       )}
 
@@ -365,9 +394,7 @@ export default function FreeAgentsList({
                           className="text-lg font-bold mb-2"
                           style={{
                             fontFamily: "var(--font-display)",
-                            color: canAfford
-                              ? "var(--accent-cyan)"
-                              : "#ef4444",
+                            color: canAfford ? "var(--accent-cyan)" : "#ef4444",
                           }}
                         >
                           {formatCurrency(fa.market_value)}

@@ -14,6 +14,8 @@ import {
 import { generateDraftClass } from "@/lib/draft/prospectGenerator";
 import { getSeasonDates } from "@/lib/season/calendarUtils";
 import { generateTeamPersonality, saveTeamPersonality } from "@/lib/ai/personalityGenerator";
+import { generateFullSeasonSchedule } from "@/lib/schedule/scheduleGenerator";
+import type { Database } from "@/lib/types/database.types";
 
 interface SeasonTransitionResult {
   success: boolean;
@@ -92,17 +94,80 @@ async function initializeStandings(
 }
 
 /**
- * Generate schedule for the new season
- * This is a placeholder - you'll need to implement full schedule generation
+ * Generate schedule for the new season using previous season standings
  */
-async function generateSchedule(
+async function generateScheduleForNewSeason(
   supabase: any,
   newSeasonId: string,
+  previousSeasonId: string,
+  newYear: number
 ): Promise<void> {
-  // TODO: Implement full schedule generation
-  // For now, this is a placeholder
-  // You can use the existing scheduleGenerator.ts logic here
-  console.log("Schedule generation not yet implemented for", newSeasonId);
+  console.log("📅 Generating schedule for new season...");
+
+  // Fetch all teams
+  const { data: allTeams, error: teamsError } = await supabase
+    .from("teams")
+    .select("*");
+
+  if (teamsError || !allTeams) {
+    console.error("Error fetching teams:", teamsError);
+    throw new Error("Failed to fetch teams for schedule generation");
+  }
+
+  // Fetch previous season standings
+  const { data: previousStandings, error: standingsError } = await supabase
+    .from("team_standings")
+    .select("*")
+    .eq("season_id", previousSeasonId);
+
+  if (standingsError) {
+    console.error("Error fetching standings:", standingsError);
+    // Continue without standings if error
+  }
+
+  console.log(`   📊 Using previous season standings (${previousStandings?.length || 0} teams)`);
+
+  // Generate the full schedule with standings
+  const { games, byeWeeks } = generateFullSeasonSchedule(
+    allTeams,
+    newSeasonId,
+    newYear,
+    previousStandings || undefined
+  );
+
+  console.log(`   Generated ${games.length} games and ${byeWeeks.length} bye weeks`);
+
+  // Insert games in batches
+  const gameBatchSize = 100;
+  for (let i = 0; i < games.length; i += gameBatchSize) {
+    const batch = games.slice(i, i + gameBatchSize);
+    const { error: gamesError } = await supabase.from("games").insert(batch);
+
+    if (gamesError) {
+      console.error("Error inserting games batch:", gamesError);
+      throw new Error("Failed to insert games");
+    }
+
+    console.log(
+      `   Inserted games ${i + 1}-${Math.min(i + gameBatchSize, games.length)} of ${games.length}`
+    );
+  }
+
+  // Insert bye weeks
+  if (byeWeeks && byeWeeks.length > 0) {
+    const { error: byeError } = await supabase
+      .from("team_bye_weeks")
+      .insert(byeWeeks);
+
+    if (byeError) {
+      console.error("Error inserting bye weeks:", byeError);
+      throw new Error("Failed to insert bye weeks");
+    }
+
+    console.log(`   ✅ Inserted ${byeWeeks.length} bye week assignments`);
+  }
+
+  console.log("✅ Schedule generation complete");
 }
 
 /**
@@ -197,8 +262,22 @@ export async function processSeasonEnd(
     console.log("Generating draft class...");
     const prospectsGenerated = await generateDraftClass(supabase, newSeasonId);
 
-    // Step 9: Generate schedule (placeholder for now)
-    // await generateSchedule(supabase, newSeasonId);
+    // Step 9: Generate schedule with previous season standings
+    console.log("Generating schedule...");
+    const { data: newSeasonData } = await supabase
+      .from("seasons")
+      .select("year")
+      .eq("id", newSeasonId)
+      .single();
+
+    if (newSeasonData) {
+      await generateScheduleForNewSeason(
+        supabase,
+        newSeasonId,
+        currentSeasonId,
+        newSeasonData.year
+      );
+    }
 
     // Note: AI Free Agency will run gradually during the free_agency phase
     // via day-by-day simulation with autonomous team agents

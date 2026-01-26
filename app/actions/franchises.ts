@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/types/database.types";
-import { generateSchedule } from "@/lib/schedule/scheduleGenerator";
+import { generateFullSeasonSchedule } from "@/lib/schedule/scheduleGenerator";
 
 type Team = Database["public"]["Tables"]["teams"]["Row"];
 
@@ -331,6 +331,51 @@ export async function createFranchise(data: CreateFranchiseData) {
 
   console.log("✅ Contracts copied");
 
+  // ============================================================================
+  // RECALCULATE ACCURATE CAP SPACE BASED ON ACTUAL CONTRACTS
+  // ============================================================================
+
+  console.log("💰 Recalculating cap space based on actual contracts...");
+
+  // For each team, calculate actual cap space from contracts
+  for (const team of allTeams) {
+    // Get all contracts for this team in the new season
+    const { data: teamContracts, error: contractsError } = await supabase
+      .from("contracts")
+      .select("cap_hit")
+      .eq("season_id", season.id)
+      .eq("team_id", team.id);
+
+    if (contractsError) {
+      console.error(`Error fetching contracts for ${team.abbreviation}:`, contractsError);
+      continue;
+    }
+
+    // Sum up all cap hits
+    const totalCapHit = teamContracts?.reduce((sum, c) => sum + c.cap_hit, 0) || 0;
+
+    // Calculate actual cap space (no rollover for new franchises)
+    const salaryCap = 255000000; // $255M
+    const actualCapSpace = salaryCap - totalCapHit;
+
+    // Update team_finances with accurate cap space
+    const { error: updateError } = await supabase
+      .from("team_finances")
+      .update({ cap_space: actualCapSpace })
+      .eq("season_id", season.id)
+      .eq("team_id", team.id);
+
+    if (updateError) {
+      console.error(`Error updating finances for ${team.abbreviation}:`, updateError);
+    } else {
+      console.log(
+        `   ${team.abbreviation}: $${(totalCapHit / 1000000).toFixed(1)}M committed, $${(actualCapSpace / 1000000).toFixed(1)}M available`,
+      );
+    }
+  }
+
+  console.log("✅ Cap space recalculated for all teams");
+
   // Step 4: Copy free_agents from template season
   console.log("📋 Copying free agents from template...");
 
@@ -375,8 +420,34 @@ export async function createFranchise(data: CreateFranchiseData) {
 
   console.log("📅 Generating season schedule...");
 
-  // Generate the schedule for all 32 teams
-  const scheduleGames = generateSchedule(allTeams, season.id, season.year);
+  // Fetch 2025 template season standings for realistic matchups
+  const { data: templateSeason2025 } = await supabase
+    .from("seasons")
+    .select("id")
+    .eq("is_template", true)
+    .eq("year", 2025)
+    .single();
+
+  let previousStandings = null;
+  if (templateSeason2025) {
+    const { data: standings } = await supabase
+      .from("team_standings")
+      .select("*")
+      .eq("season_id", templateSeason2025.id);
+
+    previousStandings = standings;
+    console.log(`   📊 Using 2025 standings data (${standings?.length || 0} teams)`);
+  } else {
+    console.log("   ⚠️  No 2025 template standings found, using default matchups");
+  }
+
+  // Generate the schedule for all 32 teams with standings
+  const { games: scheduleGames, byeWeeks } = generateFullSeasonSchedule(
+    allTeams,
+    season.id,
+    season.year,
+    previousStandings || undefined
+  );
 
   // Insert games in batches to avoid timeout
   const batchSize = 100;
@@ -395,6 +466,21 @@ export async function createFranchise(data: CreateFranchiseData) {
   }
 
   console.log(`✅ Created ${scheduleGames.length} games`);
+
+  // Insert bye weeks
+  if (byeWeeks && byeWeeks.length > 0) {
+    const { error: byeError } = await supabase
+      .from("team_bye_weeks")
+      .insert(byeWeeks);
+
+    if (byeError) {
+      console.error("Error inserting bye weeks:", byeError);
+      // Non-critical, continue anyway
+    } else {
+      console.log(`✅ Created ${byeWeeks.length} bye week assignments`);
+    }
+  }
+
   console.log("🎉 Franchise setup complete!");
 
   // Revalidate and redirect
