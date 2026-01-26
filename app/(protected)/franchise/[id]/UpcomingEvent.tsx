@@ -1,6 +1,10 @@
 "use client";
 
-import { advanceToNextWeek, advanceToPhase, advanceByDays } from "@/app/actions/simulation";
+import {
+  advanceToNextWeek,
+  advanceToPhase,
+  advanceByDays,
+} from "@/app/actions/simulation";
 import { getSeasonDates } from "@/lib/season/calendarUtils";
 import { useState } from "react";
 import { Zap } from "lucide-react";
@@ -45,34 +49,38 @@ export default function UpcomingEvent({
 
   const getPhaseDisplay = () => {
     const phaseMap: Record<string, string> = {
-      'regular_season': 'REGULAR SEASON',
-      'preseason': 'PRESEASON',
-      'postseason': 'POSTSEASON',
-      'offseason': 'OFFSEASON',
-      'draft': 'NFL DRAFT',
-      'free_agency': 'FREE AGENCY',
-      'training_camp': 'TRAINING CAMP',
+      regular_season: "REGULAR SEASON",
+      preseason: "PRESEASON",
+      postseason: "POSTSEASON",
+      offseason: "OFFSEASON",
+      draft: "NFL DRAFT",
+      free_agency: "FREE AGENCY",
+      training_camp: "TRAINING CAMP",
     };
-    return phaseMap[phase] || 'SEASON';
+    return phaseMap[phase] || "SEASON";
   };
 
   const getEventTitle = () => {
-    if (phase === 'regular_season' || phase === 'preseason' || phase === 'postseason') {
-      return 'Upcoming Event';
+    if (
+      phase === "regular_season" ||
+      phase === "preseason" ||
+      phase === "postseason"
+    ) {
+      return "Upcoming Event";
     }
-    if (phase === 'offseason') {
-      return 'Offseason';
+    if (phase === "offseason") {
+      return "Offseason";
     }
-    if (phase === 'draft') {
-      return 'NFL Draft';
+    if (phase === "draft") {
+      return "NFL Draft";
     }
-    if (phase === 'free_agency') {
-      return 'Free Agency';
+    if (phase === "free_agency") {
+      return "Free Agency";
     }
-    if (phase === 'training_camp') {
-      return 'Training Camp';
+    if (phase === "training_camp") {
+      return "Training Camp";
     }
-    return 'Next Event';
+    return "Next Event";
   };
 
   const getNextMajorEvent = () => {
@@ -80,22 +88,54 @@ export default function UpcomingEvent({
     const currentDate = simulationDate ? new Date(simulationDate) : new Date();
 
     // Map phases to their next major event
-    const phaseTransitions: Record<string, { date: Date; name: string; targetPhase: string }> = {
-      offseason: { date: dates.freeAgencyStart, name: "Free Agency", targetPhase: "free_agency" },
-      free_agency: { date: dates.draftStart, name: "NFL Draft", targetPhase: "draft" },
-      draft: { date: dates.trainingCampStart, name: "Training Camp", targetPhase: "training_camp" },
-      training_camp: { date: dates.preseasonWeek1, name: "Preseason", targetPhase: "preseason" },
+    const phaseTransitions: Record<
+      string,
+      { date: Date; name: string; targetPhase: string }
+    > = {
+      offseason: {
+        date: dates.freeAgencyStart,
+        name: "Free Agency",
+        targetPhase: "free_agency",
+      },
+      free_agency: {
+        date: dates.draftStart,
+        name: "NFL Draft",
+        targetPhase: "draft",
+      },
+      draft: {
+        date: dates.trainingCampStart,
+        name: "Training Camp",
+        targetPhase: "training_camp",
+      },
+      training_camp: {
+        date: dates.preseasonWeek1,
+        name: "Preseason",
+        targetPhase: "preseason",
+      },
       regular_season: tradeDeadlinePassed
-        ? { date: dates.wildCardStart, name: "Postseason", targetPhase: "postseason" }
-        : { date: dates.tradeDeadline, name: "Trade Deadline", targetPhase: "trade_deadline" },
-      postseason: { date: dates.superBowl, name: "Super Bowl", targetPhase: "offseason" },
+        ? {
+            date: dates.wildCardStart,
+            name: "Postseason",
+            targetPhase: "postseason",
+          }
+        : {
+            date: dates.tradeDeadline,
+            name: "Trade Deadline",
+            targetPhase: "trade_deadline",
+          },
+      postseason: {
+        date: dates.superBowl,
+        name: "Super Bowl",
+        targetPhase: "offseason",
+      },
     };
 
     const transition = phaseTransitions[phase];
     if (!transition) return null;
 
     const daysUntil = Math.ceil(
-      (transition.date.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24),
+      (transition.date.getTime() - currentDate.getTime()) /
+        (1000 * 60 * 60 * 24),
     );
 
     return {
@@ -117,7 +157,9 @@ export default function UpcomingEvent({
       }
     } catch (error) {
       console.error("Failed to advance day:", error);
-      setSimulationMessages([`Error: ${error instanceof Error ? error.message : 'Unknown error'}`]);
+      setSimulationMessages([
+        `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      ]);
     } finally {
       setIsSimulating(false);
     }
@@ -128,14 +170,16 @@ export default function UpcomingEvent({
     setSimulationMessages([]);
     try {
       const result = await advanceToNextWeek(franchiseId);
-      if (result.success && result.messages) {
-        setSimulationMessages(result.messages);
+      if (result.success && result.message) {
+        setSimulationMessages([result.message]);
       } else if (!result.success && result.error) {
         setSimulationMessages([`Error: ${result.error}`]);
       }
     } catch (error) {
       console.error("Failed to advance week:", error);
-      setSimulationMessages([`Error: ${error instanceof Error ? error.message : 'Unknown error'}`]);
+      setSimulationMessages([
+        `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      ]);
     } finally {
       setIsSimulating(false);
     }
@@ -146,31 +190,35 @@ export default function UpcomingEvent({
     setSimulationMessages([]);
     try {
       const result = await advanceToPhase(franchiseId, targetPhase);
-      if (result.success && result.messages) {
-        setSimulationMessages(result.messages);
+      if (result.success && result.message) {
+        setSimulationMessages([result.message]);
       } else if (!result.success && result.error) {
         setSimulationMessages([`Error: ${result.error}`]);
       }
     } catch (error) {
       console.error("Failed to advance to phase:", error);
-      setSimulationMessages([`Error: ${error instanceof Error ? error.message : 'Unknown error'}`]);
+      setSimulationMessages([
+        `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      ]);
     } finally {
       setIsSimulating(false);
     }
   };
 
   const isInSeasonPhase = () => {
-    return ['preseason', 'regular_season', 'postseason'].includes(phase);
+    return ["preseason", "regular_season", "postseason"].includes(phase);
   };
 
   const formatCurrentDate = () => {
     const currentDate = simulationDate ? new Date(simulationDate) : new Date();
 
-    const weekday = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
-    const dateMain = currentDate.toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
+    const weekday = currentDate.toLocaleDateString("en-US", {
+      weekday: "long",
+    });
+    const dateMain = currentDate.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
     });
 
     return { weekday: weekday.toUpperCase(), dateMain };
@@ -180,7 +228,7 @@ export default function UpcomingEvent({
     // Show game matchup for in-season phases
     if (isInSeasonPhase() && upcomingGame) {
       const { home_team, away_team } = upcomingGame;
-      const record = '(0-0)'; // TODO: Get actual records
+      const record = "(0-0)"; // TODO: Get actual records
 
       return (
         <div className="cyber-event-card flex items-start gap-4">
@@ -196,11 +244,15 @@ export default function UpcomingEvent({
             </div>
             <h3
               className="text-xl font-bold mb-1"
-              style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}
+              style={{
+                fontFamily: "var(--font-display)",
+                color: "var(--text-primary)",
+              }}
             >
-              {away_team.city} {away_team.name} @ {home_team.city} {home_team.name}
+              {away_team.city} {away_team.name} @ {home_team.city}{" "}
+              {home_team.name}
             </h3>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
               Week {upcomingGame.week} Game
             </p>
           </div>
@@ -225,15 +277,18 @@ export default function UpcomingEvent({
               {isToday && <span className="cyber-badge-yellow">TODAY</span>}
             </div>
             <h3
-              className="text-xl font-bold mb-1"
-              style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}
+              className="text-3xl font-bold"
+              style={{
+                fontFamily: "var(--font-display)",
+                color: "var(--text-primary)",
+              }}
             >
               {nextEvent.eventName}
             </h3>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
               {isToday
-                ? 'The event begins today'
-                : `in ${nextEvent.daysUntil} day${nextEvent.daysUntil !== 1 ? 's' : ''}`}
+                ? "The event begins today"
+                : `in ${nextEvent.daysUntil} day${nextEvent.daysUntil !== 1 ? "s" : ""}`}
             </p>
           </div>
         </div>
@@ -243,7 +298,7 @@ export default function UpcomingEvent({
     // Fallback
     return (
       <div className="text-center py-8">
-        <p style={{ color: 'var(--text-secondary)' }}>No upcoming events</p>
+        <p style={{ color: "var(--text-secondary)" }}>No upcoming events</p>
       </div>
     );
   };
@@ -255,14 +310,14 @@ export default function UpcomingEvent({
       <div
         className="mt-6 mb-4 p-4 rounded-lg border"
         style={{
-          background: 'hsl(var(--bg-light-hsl) / 0.5)',
-          borderColor: 'hsl(var(--cyber-cyan) / 0.3)',
-          borderLeftWidth: '3px',
+          background: "hsl(var(--bg-light-hsl) / 0.5)",
+          borderColor: "hsl(var(--cyber-cyan) / 0.3)",
+          borderLeftWidth: "3px",
         }}
       >
         <p
           className="text-sm font-bold mb-2 font-mono uppercase tracking-wider"
-          style={{ color: 'hsl(var(--cyber-cyan))' }}
+          style={{ color: "hsl(var(--cyber-cyan))" }}
         >
           Simulation Results:
         </p>
@@ -271,7 +326,10 @@ export default function UpcomingEvent({
             <li
               key={idx}
               className="text-sm"
-              style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-body)' }}
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-body)",
+              }}
             >
               • {msg}
             </li>
@@ -287,32 +345,32 @@ export default function UpcomingEvent({
     // Get the appropriate secondary button based on phase
     let secondaryButton = null;
     if (nextEvent) {
-      let buttonLabel = '';
+      let buttonLabel = "";
       let buttonIcon = null;
       switch (nextEvent.targetPhase) {
-        case 'free_agency':
-          buttonLabel = 'To Event';
+        case "free_agency":
+          buttonLabel = "To Free Agency";
           break;
-        case 'draft':
-          buttonLabel = 'To Event';
+        case "draft":
+          buttonLabel = "To Draft";
           break;
-        case 'training_camp':
-          buttonLabel = 'To Event';
+        case "training_camp":
+          buttonLabel = "To Training Camp";
           break;
-        case 'preseason':
-          buttonLabel = 'To Event';
+        case "preseason":
+          buttonLabel = "To Preseason";
           break;
-        case 'regular_season':
-          buttonLabel = 'To Event';
+        case "regular_season":
+          buttonLabel = "To Regular Season";
           break;
-        case 'trade_deadline':
-          buttonLabel = 'To Event';
+        case "trade_deadline":
+          buttonLabel = "To Trade Deadline";
           break;
-        case 'postseason':
-          buttonLabel = 'To Event';
+        case "postseason":
+          buttonLabel = "To Postseason";
           break;
-        case 'offseason':
-          buttonLabel = 'To Event';
+        case "offseason":
+          buttonLabel = "To Offseason";
           break;
       }
 
@@ -324,8 +382,8 @@ export default function UpcomingEvent({
             disabled={isSimulating}
             className="cyber-button cyber-button-accent w-full flex items-center justify-center gap-2"
           >
-            <Zap size={16} />
-            {isSimulating ? 'Simulating...' : buttonLabel}
+            <Zap size={20} />
+            {isSimulating ? "Simulating..." : buttonLabel}
           </button>
         );
       }
@@ -352,7 +410,7 @@ export default function UpcomingEvent({
           >
             <polygon points="5 3 19 12 5 21 5 3" />
           </svg>
-          {isSimulating ? '...' : 'Sim Day'}
+          {isSimulating ? "..." : "Sim Day"}
         </button>
 
         {/* Secondary button: Sim Week */}
@@ -373,14 +431,20 @@ export default function UpcomingEvent({
             strokeLinejoin="round"
           >
             <polygon points="5 3 19 12 5 21 5 3" />
-            <polygon points="11 3 25 12 11 21 11 3" transform="translate(-6 0)" />
+            <polygon
+              points="11 3 25 12 11 21 11 3"
+              transform="translate(-6 0)"
+            />
           </svg>
-          {isSimulating ? '...' : 'Sim Week'}
+          {isSimulating ? "..." : "Sim Week"}
         </button>
 
         {/* Tertiary button: Phase-specific */}
         {secondaryButton || (
-          <button disabled className="cyber-button w-full opacity-30 cursor-not-allowed">
+          <button
+            disabled
+            className="cyber-button w-full opacity-30 cursor-not-allowed"
+          >
             <Zap size={16} className="mx-auto" />
           </button>
         )}
@@ -410,7 +474,10 @@ export default function UpcomingEvent({
               </span>
             )}
           </div>
-          <span className="text-xs font-mono tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
+          <span
+            className="text-xs font-mono tracking-wider"
+            style={{ color: "var(--text-tertiary)" }}
+          >
             {year} SEASON
           </span>
         </div>

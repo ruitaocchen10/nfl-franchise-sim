@@ -25,6 +25,11 @@ type ByeWeekInsert = {
   bye_week_date: string;
 };
 
+// Internal type for schedule generation with metadata
+type GameWithMetadata = Omit<GameInsert, "week"> & {
+  is_divisional?: boolean;
+};
+
 interface Division {
   name: string;
   teams: Team[];
@@ -92,36 +97,46 @@ function generateByeWeeks(
   const shuffledTeams = shuffle([...teams]);
 
   // Distribute teams across bye weeks 6-14 (9 weeks, 32 teams)
-  // ~3-4 teams per week
-  let weekNumber = 6;
-  shuffledTeams.forEach((team, index) => {
-    if (index > 0 && index % 4 === 0) {
-      weekNumber++;
+  // Calculate teams per week: 32 teams / 9 weeks ≈ 3.5 teams per week
+  // Use pattern: 4,4,4,4,4,3,3,3,3 teams per week
+  const teamsPerWeek = [4, 4, 4, 4, 4, 3, 3, 3, 3]; // Sums to 32
+  let teamIndex = 0;
+
+  teamsPerWeek.forEach((teamCount, weekIndex) => {
+    const weekNumber = 6 + weekIndex; // Weeks 6-14
+
+    for (let i = 0; i < teamCount && teamIndex < shuffledTeams.length; i++) {
+      const team = shuffledTeams[teamIndex];
+      const byeDate = getSundayOfWeek(weekNumber, year);
+
+      byeWeeks.push({
+        season_id: seasonId,
+        team_id: team.id,
+        bye_week_number: weekNumber,
+        bye_week_date: byeDate.toISOString(),
+      });
+
+      teamIndex++;
     }
-    if (weekNumber > 14) weekNumber = 14; // Cap at week 14
-
-    const byeDate = getSundayOfWeek(weekNumber, year);
-
-    byeWeeks.push({
-      season_id: seasonId,
-      team_id: team.id,
-      bye_week_number: weekNumber,
-      bye_week_date: byeDate.toISOString(),
-    });
   });
 
   return byeWeeks;
 }
 
 /**
- * Assigns games to weeks while avoiding same-team matchups and bye weeks
+ * Assigns games to weeks with constraint-based algorithm
+ * - Week 18: All teams play divisional opponents
+ * - Weeks 6-14: Respect bye weeks (teams on bye have no games)
+ * - All weeks: Each team plays exactly 1 game per week
  */
 function assignWeeks(
-  games: Omit<GameInsert, "week">[],
+  games: GameWithMetadata[],
   byeWeeks: ByeWeekInsert[],
   totalWeeks: number = 18,
 ): GameInsert[] {
   const gamesWithWeeks: GameInsert[] = [];
+
+  // Track which weeks each team is scheduled (including bye weeks)
   const teamWeekAssignments: Map<string, Set<number>> = new Map();
 
   // Initialize tracking for each team
@@ -134,40 +149,101 @@ function assignWeeks(
     }
   });
 
-  // Block out bye weeks
+  // Block out bye weeks (teams can't play during their bye)
+  const teamByeWeeks = new Map<string, number>();
   byeWeeks.forEach((bye) => {
+    teamByeWeeks.set(bye.team_id, bye.bye_week_number);
     const teamSchedule = teamWeekAssignments.get(bye.team_id);
     if (teamSchedule) {
       teamSchedule.add(bye.bye_week_number);
     }
   });
 
-  // Shuffle games for better distribution
-  const shuffledGames = shuffle(games);
+  // Separate divisional and non-divisional games
+  const divisionalGames = games.filter((game) => game.is_divisional === true);
+  const nonDivisionalGames = games.filter(
+    (game) => game.is_divisional !== true,
+  );
 
-  // Assign each game to earliest available week
-  shuffledGames.forEach((game) => {
-    const homeSchedule = teamWeekAssignments.get(game.home_team_id)!;
-    const awaySchedule = teamWeekAssignments.get(game.away_team_id)!;
+  console.log(`   Divisional games: ${divisionalGames.length}`);
+  console.log(`   Non-divisional games: ${nonDivisionalGames.length}`);
 
-    // Find first week where both teams are available
-    let assignedWeek = 1;
-    for (let week = 1; week <= totalWeeks; week++) {
+  // STEP 1: Assign one divisional game per team to Week 18
+  const week18Assignments = new Set<string>(); // Track teams assigned to week 18
+  const week18Games = new Set<GameWithMetadata>(); // Track which games were assigned to week 18
+  const shuffledDivisional = shuffle([...divisionalGames]);
+
+  for (const game of shuffledDivisional) {
+    const homeId = game.home_team_id;
+    const awayId = game.away_team_id;
+
+    // If both teams haven't been assigned to week 18 yet, assign this game
+    if (!week18Assignments.has(homeId) && !week18Assignments.has(awayId)) {
+      // Strip out metadata before adding week
+      const { is_divisional, ...gameData } = game;
+      gamesWithWeeks.push({ ...gameData, week: 18 } as GameInsert);
+      teamWeekAssignments.get(homeId)!.add(18);
+      teamWeekAssignments.get(awayId)!.add(18);
+      week18Assignments.add(homeId);
+      week18Assignments.add(awayId);
+      week18Games.add(game); // Track this specific game
+    }
+  }
+
+  console.log(
+    `   ✓ Assigned ${week18Games.size} games to week 18 (${week18Assignments.size} teams)`,
+  );
+
+  // Remaining divisional games go into the pool (games NOT assigned to week 18)
+  const remainingDivisional = divisionalGames.filter(
+    (game) => !week18Games.has(game),
+  );
+
+  // STEP 2: Distribute remaining games across weeks 1-17
+  const remainingGames = [...remainingDivisional, ...nonDivisionalGames];
+  const shuffledRemaining = shuffle(remainingGames);
+
+  // Try to assign each game to a week
+  for (const game of shuffledRemaining) {
+    const homeId = game.home_team_id;
+    const awayId = game.away_team_id;
+    const homeSchedule = teamWeekAssignments.get(homeId)!;
+    const awaySchedule = teamWeekAssignments.get(awayId)!;
+
+    let assigned = false;
+
+    // Try weeks 1-17 in order
+    for (let week = 1; week <= 17; week++) {
       if (!homeSchedule.has(week) && !awaySchedule.has(week)) {
-        assignedWeek = week;
+        // Strip out metadata before adding week
+        const { is_divisional, ...gameData } = game;
+        gamesWithWeeks.push({ ...gameData, week } as GameInsert);
+        homeSchedule.add(week);
+        awaySchedule.add(week);
+        assigned = true;
         break;
       }
     }
 
-    // Mark teams as scheduled for this week
-    homeSchedule.add(assignedWeek);
-    awaySchedule.add(assignedWeek);
+    if (!assigned) {
+      console.warn(`   ⚠️  Could not assign game: ${homeId} vs ${awayId}`);
+    }
+  }
 
-    gamesWithWeeks.push({
-      ...game,
-      week: assignedWeek,
-    });
+  // Validation: Check that each team has the right number of games
+  const teamGameCounts = new Map<string, number>();
+  gamesWithWeeks.forEach((game) => {
+    teamGameCounts.set(
+      game.home_team_id,
+      (teamGameCounts.get(game.home_team_id) || 0) + 1,
+    );
+    teamGameCounts.set(
+      game.away_team_id,
+      (teamGameCounts.get(game.away_team_id) || 0) + 1,
+    );
   });
+
+  console.log(`   ✓ Assigned ${gamesWithWeeks.length} games to weeks`);
 
   return gamesWithWeeks;
 }
@@ -245,7 +321,10 @@ function assignPreseasonDates(games: GameInsert[], year: number): GameInsert[] {
  * Assign dates and time slots to regular season games
  * Includes TNF, SNF, MNF, and special games (Thanksgiving, Saturday)
  */
-function assignRegularSeasonDates(games: GameInsert[], year: number): GameInsert[] {
+function assignRegularSeasonDates(
+  games: GameInsert[],
+  year: number,
+): GameInsert[] {
   const gamesWithDates: GameInsert[] = [];
 
   // Group games by week
@@ -335,7 +414,8 @@ function generatePreseasonGames(
   teams: Team[],
   seasonId: string,
 ): Omit<GameInsert, "week" | "game_date" | "game_time_slot">[] {
-  const allGames: Omit<GameInsert, "week" | "game_date" | "game_time_slot">[] = [];
+  const allGames: Omit<GameInsert, "week" | "game_date" | "game_time_slot">[] =
+    [];
   const { AFC, NFC } = organizeTeams(teams);
 
   // Helper to create a game
@@ -389,7 +469,7 @@ export function generateRegularSeasonSchedule(
   byeWeeks: ByeWeekInsert[];
 } {
   const { AFC, NFC } = organizeTeams(teams);
-  const allGames: Omit<GameInsert, "week">[] = [];
+  const allGames: GameWithMetadata[] = [];
 
   let divisionalGames = 0;
   let intraConferenceGames = 0;
@@ -401,13 +481,15 @@ export function generateRegularSeasonSchedule(
   const createGame = (
     homeTeam: Team,
     awayTeam: Team,
-  ): Omit<GameInsert, "week"> => ({
+    isDivisional: boolean = false,
+  ): GameWithMetadata => ({
     season_id: seasonId,
     home_team_id: homeTeam.id,
     away_team_id: awayTeam.id,
     game_type: "regular",
     weather: "clear",
     simulated: false,
+    is_divisional: isDivisional,
   });
 
   const divisionNames: Array<keyof Conference["divisions"]> = [
@@ -424,8 +506,8 @@ export function generateRegularSeasonSchedule(
       const division = conference.divisions[divisionName];
       for (let i = 0; i < division.length; i++) {
         for (let j = i + 1; j < division.length; j++) {
-          allGames.push(createGame(division[i], division[j]));
-          allGames.push(createGame(division[j], division[i]));
+          allGames.push(createGame(division[i], division[j], true));
+          allGames.push(createGame(division[j], division[i], true));
           divisionalGames += 2;
         }
       }
@@ -435,7 +517,12 @@ export function generateRegularSeasonSchedule(
   // Track which division pairings we've already processed to avoid duplicates
   const processedPairings = new Set<string>();
 
-  const getPairingKey = (conf1: string, div1: string, conf2: string, div2: string) => {
+  const getPairingKey = (
+    conf1: string,
+    div1: string,
+    conf2: string,
+    div2: string,
+  ) => {
     const pair1 = `${conf1}-${div1}:${conf2}-${div2}`;
     const pair2 = `${conf2}-${div2}:${conf1}-${div1}`;
     return pair1 < pair2 ? pair1 : pair2;
@@ -454,8 +541,10 @@ export function generateRegularSeasonSchedule(
 
       // Only create games once per division pairing
       const pairingKey = getPairingKey(
-        conference.name, divisionName,
-        conference.name, otherDivisionName
+        conference.name,
+        divisionName,
+        conference.name,
+        otherDivisionName,
       );
 
       if (!processedPairings.has(pairingKey)) {
@@ -484,15 +573,17 @@ export function generateRegularSeasonSchedule(
     divisionNames.forEach((divisionName, divIndex) => {
       const division = conference.divisions[divisionName];
 
-      // Determine which opposite conference division to play this year
-      const interDivIndex = (divIndex + Math.floor(year / 4)) % 4;
+      // Determine which opposite conference division to play this year (4-year rotation)
+      const interDivIndex = (divIndex + ((year - 2024) % 4)) % 4;
       const interDivisionName = divisionNames[interDivIndex];
       const interDivision = oppositeConference.divisions[interDivisionName];
 
       // Only create games once per division pairing
       const pairingKey = getPairingKey(
-        conference.name, divisionName,
-        oppositeConference.name, interDivisionName
+        conference.name,
+        divisionName,
+        oppositeConference.name,
+        interDivisionName,
       );
 
       if (!processedPairings.has(pairingKey)) {
@@ -532,8 +623,10 @@ export function generateRegularSeasonSchedule(
 
         // Only create games once per division pairing
         const pairingKey = getPairingKey(
-          conference.name, divisionName,
-          conference.name, otherDivisionName
+          conference.name,
+          divisionName,
+          conference.name,
+          otherDivisionName,
         );
 
         if (!processedPairings.has(pairingKey)) {
@@ -580,8 +673,12 @@ export function generateRegularSeasonSchedule(
   );
 
   // Separate by conference for inter-conference matchups
-  const afcNeedingGames = teamsNeedingGames.filter((t) => t.conference === "AFC");
-  const nfcNeedingGames = teamsNeedingGames.filter((t) => t.conference === "NFC");
+  const afcNeedingGames = teamsNeedingGames.filter(
+    (t) => t.conference === "AFC",
+  );
+  const nfcNeedingGames = teamsNeedingGames.filter(
+    (t) => t.conference === "NFC",
+  );
 
   // Create inter-conference matchups
   const minLength = Math.min(afcNeedingGames.length, nfcNeedingGames.length);
@@ -644,13 +741,17 @@ export function generateRegularSeasonSchedule(
 
   // Check for teams with incorrect game counts
   const incorrectTeams = teams.filter(
-    (team) => finalGameCounts.get(team.id) !== 17
+    (team) => finalGameCounts.get(team.id) !== 17,
   );
 
   if (incorrectTeams.length > 0) {
-    console.warn(`⚠️  WARNING: ${incorrectTeams.length} teams don't have 17 games:`);
+    console.warn(
+      `⚠️  WARNING: ${incorrectTeams.length} teams don't have 17 games:`,
+    );
     incorrectTeams.forEach((team) => {
-      console.warn(`   ${team.city} ${team.name}: ${finalGameCounts.get(team.id)} games`);
+      console.warn(
+        `   ${team.city} ${team.name}: ${finalGameCounts.get(team.id)} games`,
+      );
     });
   } else {
     console.log(`✓ All teams have exactly 17 games`);
@@ -663,7 +764,11 @@ export function generateRegularSeasonSchedule(
   const gamesWithWeeks = assignWeeks(allGames, byeWeeks, 18);
 
   // Assign dates and time slots
-  const scheduledGames = assignDatesAndTimeSlots(gamesWithWeeks, year, "regular");
+  const scheduledGames = assignDatesAndTimeSlots(
+    gamesWithWeeks,
+    year,
+    "regular",
+  );
 
   return { games: scheduledGames, byeWeeks };
 }
@@ -685,46 +790,57 @@ export function generateFullSeasonSchedule(
 
   // Assign preseason games to weeks 1-3, ensuring each team gets 1 game per week
   const preseasonWithWeeks: GameInsert[] = [];
-  const teamWeekCount = new Map<string, Map<number, number>>();
+  const teamWeekAssigned = new Map<string, Set<number>>();
 
-  // Initialize tracking
+  // Initialize tracking - each team needs games in weeks 1, 2, and 3
   teams.forEach((team) => {
-    teamWeekCount.set(team.id, new Map([[1, 0], [2, 0], [3, 0]]));
+    teamWeekAssigned.set(team.id, new Set());
   });
 
-  // Assign each game to the earliest available week for both teams
-  preseasonGamesBase.forEach((game) => {
-    const homeWeeks = teamWeekCount.get(game.home_team_id)!;
-    const awayWeeks = teamWeekCount.get(game.away_team_id)!;
+  // Shuffle games for better distribution
+  const shuffledPreseason = shuffle([...preseasonGamesBase]);
 
-    // Find first week where both teams have 0 games
-    let assignedWeek = 1;
+  // Assign each game to a week where both teams are available
+  for (const game of shuffledPreseason) {
+    const homeId = game.home_team_id;
+    const awayId = game.away_team_id;
+    const homeWeeks = teamWeekAssigned.get(homeId)!;
+    const awayWeeks = teamWeekAssigned.get(awayId)!;
+
+    let assigned = false;
+
+    // Try weeks 1-3 in order
     for (let week = 1; week <= 3; week++) {
-      if (homeWeeks.get(week) === 0 && awayWeeks.get(week) === 0) {
-        assignedWeek = week;
+      if (!homeWeeks.has(week) && !awayWeeks.has(week)) {
+        preseasonWithWeeks.push({ ...game, week });
+        homeWeeks.add(week);
+        awayWeeks.add(week);
+        assigned = true;
         break;
       }
     }
 
-    // If no perfect match, find first week where at least one team has 0 games
-    if (homeWeeks.get(assignedWeek)! > 0 || awayWeeks.get(assignedWeek)! > 0) {
+    if (!assigned) {
+      // Fallback: assign to first available week for either team
       for (let week = 1; week <= 3; week++) {
-        if (homeWeeks.get(week) === 0 || awayWeeks.get(week) === 0) {
-          assignedWeek = week;
+        if (!homeWeeks.has(week) || !awayWeeks.has(week)) {
+          preseasonWithWeeks.push({ ...game, week });
+          homeWeeks.add(week);
+          awayWeeks.add(week);
+          assigned = true;
           break;
         }
       }
     }
 
-    // Mark teams as having a game this week
-    homeWeeks.set(assignedWeek, (homeWeeks.get(assignedWeek) || 0) + 1);
-    awayWeeks.set(assignedWeek, (awayWeeks.get(assignedWeek) || 0) + 1);
+    if (!assigned) {
+      console.warn(
+        `   ⚠️  Could not assign preseason game: ${homeId} vs ${awayId}`,
+      );
+    }
+  }
 
-    preseasonWithWeeks.push({
-      ...game,
-      week: assignedWeek,
-    });
-  });
+  console.log(`   ✓ Assigned ${preseasonWithWeeks.length} preseason games`);
 
   // Assign dates/times to preseason games
   const preseasonGames = assignDatesAndTimeSlots(
